@@ -18,6 +18,14 @@ func SetupRoutes(app *fiber.App) {
 	// Protected routes
 	protected := api.Group("/", middleware.JWTMiddleware)
 	protected.Get("/profile", getProfile)
+
+	// Employee routes
+	protected.Post("/employees", controllers.CreateEmployee)
+	protected.Get("/employees", controllers.GetEmployees)
+	protected.Get("/employees/:id", controllers.GetEmployee)
+	protected.Put("/employees/:id", controllers.UpdateEmployee)
+	protected.Delete("/employees/:id", controllers.DeleteEmployee)
+	protected.Get("/my-profile", controllers.GetMyProfile)
 }
 
 func getProfile(c *fiber.Ctx) error {
