@@ -41,6 +41,13 @@ func SetupRoutes(app *fiber.App) {
 	protected.Put("/departments/:id", controllers.UpdateDepartment)
 	protected.Delete("/departments/:id", controllers.DeleteDepartment)
 
+	// Location routes
+	protected.Post("/locations", controllers.CreateLocation)
+	protected.Get("/locations", controllers.GetLocations)
+	protected.Get("/locations/:id", controllers.GetLocation)
+	protected.Put("/locations/:id", controllers.UpdateLocation)
+	protected.Delete("/locations/:id", controllers.DeleteLocation)
+
 }
 
 func getProfile(c *fiber.Ctx) error {
