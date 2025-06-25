@@ -118,6 +118,12 @@ func SetupRoutes(app *fiber.App) {
 	protected.Put("/attendances/:id", controllers.UpdateAttendance)
 	protected.Delete("/attendances/:id", controllers.DeleteAttendance)
 
+	// Leave Request routes
+	protected.Post("/leave-requests", controllers.CreateLeaveRequest)
+	protected.Get("/leave-requests", controllers.GetLeaveRequests)
+	protected.Get("/leave-requests/:id", controllers.GetLeaveRequestByID)
+	protected.Put("/leave-requests/:id/status", controllers.UpdateLeaveStatus)
+
 }
 
 func getProfile(c *fiber.Ctx) error {
