@@ -49,12 +49,19 @@ func SetupRoutes(app *fiber.App) {
 	protected.Delete("/locations/:id", controllers.DeleteLocation)
 
 	// Job Level routes
-	// Job Level routes
 	protected.Post("/job-levels", controllers.CreateJobLevel)
 	protected.Get("/job-levels", controllers.GetJobLevels)
 	protected.Get("/job-levels/:id", controllers.GetJobLevel)
 	protected.Put("/job-levels/:id", controllers.UpdateJobLevel)
 	protected.Delete("/job-levels/:id", controllers.DeleteJobLevel)
+
+	// Education routes
+	// Education Routes
+	protected.Post("/educations", controllers.CreateEducation)
+	protected.Get("/educations", controllers.GetEducations)
+	protected.Get("/educations/:id", controllers.GetEducation)
+	protected.Put("/educations/:id", controllers.UpdateEducation)
+	protected.Delete("/educations/:id", controllers.DeleteEducation)
 
 }
 
