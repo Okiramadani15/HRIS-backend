@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"hris-backend/models"
 	"log"
 	"os"
 
@@ -33,8 +32,4 @@ func InitDB() {
 	}
 
 	DB = db
-
-	if err := db.AutoMigrate(&models.User{}, &models.Employee{}); err != nil {
-		log.Fatal("Failed to auto-migrate models:", err)
-	}
 }

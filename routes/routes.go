@@ -111,6 +111,13 @@ func SetupRoutes(app *fiber.App) {
 	protected.Put("/pay-grades/:id", controllers.UpdatePayGrade)
 	protected.Delete("/pay-grades/:id", controllers.DeletePayGrade)
 
+	// Attendance routes
+	protected.Post("/attendances", controllers.CreateAttendance)
+	protected.Get("/attendances", controllers.GetAttendances)
+	protected.Get("/attendances/:id", controllers.GetAttendanceByID)
+	protected.Put("/attendances/:id", controllers.UpdateAttendance)
+	protected.Delete("/attendances/:id", controllers.DeleteAttendance)
+
 }
 
 func getProfile(c *fiber.Ctx) error {

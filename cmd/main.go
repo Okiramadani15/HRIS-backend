@@ -14,9 +14,10 @@ import (
 func main() {
 	// Initialize database
 	config.InitDB()
+	
+	// Migrate base tables first
 	config.DB.AutoMigrate(
 		&models.User{},
-		&models.Employee{},
 		&models.Position{},
 		&models.Department{},
 		&models.Location{},
@@ -29,6 +30,12 @@ func main() {
 		&models.LeaveType{},
 		&models.Bank{},
 		&models.PayGrade{})
+	
+	// Migrate Employee without foreign key relationships
+	config.DB.AutoMigrate(&models.Employee{})
+	
+	// Migrate Attendance last (has foreign key to Employee)
+	config.DB.AutoMigrate(&models.Attendance{})
 
 	// Create Fiber app
 	app := fiber.New(fiber.Config{
