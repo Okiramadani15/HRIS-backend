@@ -83,6 +83,13 @@ func SetupRoutes(app *fiber.App) {
 	protected.Put("/employment-types/:id", controllers.UpdateEmploymentType)
 	protected.Delete("/employment-types/:id", controllers.DeleteEmploymentType)
 
+	// Work Shift routes
+	protected.Post("/work-shifts", controllers.CreateWorkShift)
+	protected.Get("/work-shifts", controllers.GetWorkShifts)
+	protected.Get("/work-shifts/:id", controllers.GetWorkShift)
+	protected.Put("/work-shifts/:id", controllers.UpdateWorkShift)
+	protected.Delete("/work-shifts/:id", controllers.DeleteWorkShift)
+
 }
 
 func getProfile(c *fiber.Ctx) error {
