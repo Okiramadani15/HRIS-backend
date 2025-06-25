@@ -62,12 +62,19 @@ func SetupRoutes(app *fiber.App) {
 	protected.Put("/educations/:id", controllers.UpdateEducation)
 	protected.Delete("/educations/:id", controllers.DeleteEducation)
 
-	// Marital Status
+	// Marital Status Routes
 	protected.Post("/marital-statuses", controllers.CreateMaritalStatus)
 	protected.Get("/marital-statuses", controllers.GetMaritalStatuses)
 	protected.Get("/marital-statuses/:id", controllers.GetMaritalStatus)
 	protected.Put("/marital-statuses/:id", controllers.UpdateMaritalStatus)
 	protected.Delete("/marital-statuses/:id", controllers.DeleteMaritalStatus)
+
+	//Religion Routes
+	protected.Post("/religions", controllers.CreateReligion)
+	protected.Get("/religions", controllers.GetReligions)
+	protected.Get("/religions/:id", controllers.GetReligion)
+	protected.Put("/religions/:id", controllers.UpdateReligion)
+	protected.Delete("/religions/:id", controllers.DeleteReligion)
 
 }
 

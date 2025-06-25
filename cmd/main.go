@@ -14,7 +14,16 @@ import (
 func main() {
 	// Initialize database
 	config.InitDB()
-	config.DB.AutoMigrate(&models.User{}, &models.Employee{}, &models.Position{}, &models.Department{}, &models.Location{}, &models.JobLevel{}, &models.Education{}, &models.MaritalStatus{})
+	config.DB.AutoMigrate(
+		&models.User{},
+		&models.Employee{},
+		&models.Position{},
+		&models.Department{},
+		&models.Location{},
+		&models.JobLevel{},
+		&models.Education{},
+		&models.MaritalStatus{},
+		&models.Religion{})
 
 	// Create Fiber app
 	app := fiber.New(fiber.Config{
