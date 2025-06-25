@@ -33,6 +33,14 @@ func SetupRoutes(app *fiber.App) {
 	protected.Get("/positions/:id", controllers.GetPositionByID)
 	protected.Put("/positions/:id", controllers.UpdatePosition)
 	protected.Delete("/positions/:id", controllers.DeletePosition)
+
+	// Department routes
+	protected.Post("/departments", controllers.CreateDepartment)
+	protected.Get("/departments", controllers.GetDepartments)
+	protected.Get("/departments/:id", controllers.GetDepartment)
+	protected.Put("/departments/:id", controllers.UpdateDepartment)
+	protected.Delete("/departments/:id", controllers.DeleteDepartment)
+
 }
 
 func getProfile(c *fiber.Ctx) error {
