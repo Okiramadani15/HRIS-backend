@@ -90,6 +90,13 @@ func SetupRoutes(app *fiber.App) {
 	protected.Put("/work-shifts/:id", controllers.UpdateWorkShift)
 	protected.Delete("/work-shifts/:id", controllers.DeleteWorkShift)
 
+	// Leave Type routes
+	protected.Post("/leave-types", controllers.CreateLeaveType)
+	protected.Get("/leave-types", controllers.GetLeaveTypes)
+	protected.Get("/leave-types/:id", controllers.GetLeaveType)
+	protected.Put("/leave-types/:id", controllers.UpdateLeaveType)
+	protected.Delete("/leave-types/:id", controllers.DeleteLeaveType)
+
 }
 
 func getProfile(c *fiber.Ctx) error {

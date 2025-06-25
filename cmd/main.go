@@ -25,7 +25,8 @@ func main() {
 		&models.MaritalStatus{},
 		&models.Religion{},
 		&models.EmploymentType{},
-		&models.WorkShift{})
+		&models.WorkShift{},
+		&models.LeaveType{})
 
 	// Create Fiber app
 	app := fiber.New(fiber.Config{
