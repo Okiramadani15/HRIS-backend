@@ -97,6 +97,13 @@ func SetupRoutes(app *fiber.App) {
 	protected.Put("/leave-types/:id", controllers.UpdateLeaveType)
 	protected.Delete("/leave-types/:id", controllers.DeleteLeaveType)
 
+	// Bank List routes
+	protected.Post("/banks", controllers.CreateBank)
+	protected.Get("/banks", controllers.GetBanks)
+	protected.Get("/banks/:id", controllers.GetBank)
+	protected.Put("/banks/:id", controllers.UpdateBank)
+	protected.Delete("/banks/:id", controllers.DeleteBank)
+
 }
 
 func getProfile(c *fiber.Ctx) error {
