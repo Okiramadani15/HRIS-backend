@@ -76,6 +76,13 @@ func SetupRoutes(app *fiber.App) {
 	protected.Put("/religions/:id", controllers.UpdateReligion)
 	protected.Delete("/religions/:id", controllers.DeleteReligion)
 
+	//Employee Type Routes
+	protected.Post("/employment-types", controllers.CreateEmploymentType)
+	protected.Get("/employment-types", controllers.GetEmploymentTypes)
+	protected.Get("/employment-types/:id", controllers.GetEmploymentType)
+	protected.Put("/employment-types/:id", controllers.UpdateEmploymentType)
+	protected.Delete("/employment-types/:id", controllers.DeleteEmploymentType)
+
 }
 
 func getProfile(c *fiber.Ctx) error {

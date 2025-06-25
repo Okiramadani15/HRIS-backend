@@ -23,7 +23,8 @@ func main() {
 		&models.JobLevel{},
 		&models.Education{},
 		&models.MaritalStatus{},
-		&models.Religion{})
+		&models.Religion{},
+		&models.EmploymentType{})
 
 	// Create Fiber app
 	app := fiber.New(fiber.Config{
