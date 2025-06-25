@@ -55,13 +55,19 @@ func SetupRoutes(app *fiber.App) {
 	protected.Put("/job-levels/:id", controllers.UpdateJobLevel)
 	protected.Delete("/job-levels/:id", controllers.DeleteJobLevel)
 
-	// Education routes
 	// Education Routes
 	protected.Post("/educations", controllers.CreateEducation)
 	protected.Get("/educations", controllers.GetEducations)
 	protected.Get("/educations/:id", controllers.GetEducation)
 	protected.Put("/educations/:id", controllers.UpdateEducation)
 	protected.Delete("/educations/:id", controllers.DeleteEducation)
+
+	// Marital Status
+	protected.Post("/marital-statuses", controllers.CreateMaritalStatus)
+	protected.Get("/marital-statuses", controllers.GetMaritalStatuses)
+	protected.Get("/marital-statuses/:id", controllers.GetMaritalStatus)
+	protected.Put("/marital-statuses/:id", controllers.UpdateMaritalStatus)
+	protected.Delete("/marital-statuses/:id", controllers.DeleteMaritalStatus)
 
 }
 
