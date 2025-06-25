@@ -1,6 +1,7 @@
 package config
 
 import (
+	"hris-backend/middleware"
 	"os"
 
 	"github.com/gofiber/fiber/v2"
@@ -21,7 +22,8 @@ func NewFiberApp() *fiber.App {
 		},
 	})
 
-	// Middleware
+	// Middleware with panic recovery
+	app.Use(middleware.RecoveryMiddleware()) // Add panic recovery first
 	app.Use(logger.New())
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: "*",
