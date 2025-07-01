@@ -43,6 +43,15 @@ func RunMigrations(db *gorm.DB) {
 		log.Fatal("Failed to migrate tables with foreign keys:", err)
 	}
 
+	// Migrate Payroll tables
+	if err := db.AutoMigrate(
+		&models.Payroll{},
+		&models.Allowance{},
+		&models.Deduction{},
+	); err != nil {
+		log.Fatal("Failed to migrate Payroll tables:", err)
+	}
+
 	// Seed default roles
 	seedRoles(db)
 

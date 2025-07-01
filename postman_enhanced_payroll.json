@@ -1,0 +1,221 @@
+{
+  "info": {
+    "name": "Enhanced Payroll API",
+    "description": "Complete payroll system with all features"
+  },
+  "item": [
+    {
+      "name": "Allowances",
+      "item": [
+        {
+          "name": "Create Allowance",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employee_id\": \"EMP0010\",\n  \"name\": \"Tunjangan Transport\",\n  \"amount\": 500000\n}"
+            },
+            "url": "http://localhost:3000/api/allowances"
+          }
+        },
+        {
+          "name": "Create Bulk Allowances",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"allowances\": [\n    {\n      \"employee_id\": \"EMP0010\",\n      \"name\": \"Tunjangan Transport\",\n      \"amount\": 500000\n    },\n    {\n      \"employee_id\": \"EMP0010\",\n      \"name\": \"Tunjangan Makan\",\n      \"amount\": 300000\n    }\n  ]\n}"
+            },
+            "url": "http://localhost:3000/api/allowances/bulk"
+          }
+        },
+        {
+          "name": "Get Allowances",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {
+              "raw": "http://localhost:3000/api/allowances?employee_id=EMP0010",
+              "query": [{"key": "employee_id", "value": "EMP0010"}]
+            }
+          }
+        },
+        {
+          "name": "Delete Allowance",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "http://localhost:3000/api/allowances/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Deductions",
+      "item": [
+        {
+          "name": "Create Deduction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employee_id\": \"EMP0010\",\n  \"name\": \"Potongan Absen\",\n  \"amount\": 100000\n}"
+            },
+            "url": "http://localhost:3000/api/deductions"
+          }
+        },
+        {
+          "name": "Create Bulk Deductions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deductions\": [\n    {\n      \"employee_id\": \"EMP0010\",\n      \"name\": \"Potongan Absen\",\n      \"amount\": 100000\n    },\n    {\n      \"employee_id\": \"EMP0010\",\n      \"name\": \"Potongan Telat\",\n      \"amount\": 50000\n    }\n  ]\n}"
+            },
+            "url": "http://localhost:3000/api/deductions/bulk"
+          }
+        },
+        {
+          "name": "Get Deductions",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "http://localhost:3000/api/deductions"
+          }
+        },
+        {
+          "name": "Delete Deduction",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "http://localhost:3000/api/deductions/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payroll",
+      "item": [
+        {
+          "name": "Generate Payroll",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"month\": \"07\",\n  \"year\": \"2025\"\n}"
+            },
+            "url": "http://localhost:3000/api/payroll/generate"
+          }
+        },
+        {
+          "name": "Get All Payrolls",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "http://localhost:3000/api/payrolls"
+          }
+        },
+        {
+          "name": "Get Payroll Summary",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {
+              "raw": "http://localhost:3000/api/payroll/summary?month=07&year=2025",
+              "query": [
+                {"key": "month", "value": "07"},
+                {"key": "year", "value": "2025"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": "http://localhost:3000/api/payroll/dashboard"
+          }
+        },
+        {
+          "name": "Update Payroll",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"base_salary\": 6000000,\n  \"total_allowances\": 900000,\n  \"total_deductions\": 150000\n}"
+            },
+            "url": "http://localhost:3000/api/payroll/1"
+          }
+        },
+        {
+          "name": "Update Status to Paid",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"paid\"\n}"
+            },
+            "url": "http://localhost:3000/api/payroll/1/status"
+          }
+        },
+        {
+          "name": "Export to CSV",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {
+              "raw": "http://localhost:3000/api/payroll/export/csv?month=07&year=2025",
+              "query": [
+                {"key": "month", "value": "07"},
+                {"key": "year", "value": "2025"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Employee Payroll Detail",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {
+              "raw": "http://localhost:3000/api/payroll/EMP0010?month=07&year=2025",
+              "query": [
+                {"key": "month", "value": "07"},
+                {"key": "year", "value": "2025"}
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

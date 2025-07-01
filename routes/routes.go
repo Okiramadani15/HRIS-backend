@@ -133,6 +133,29 @@ func SetupRoutes(app *fiber.App) {
 	protected.Post("/users/create-with-role", controllers.CreateUserWithRole)
 	protected.Post("/assign-role", controllers.AssignUserRole)
 
+	// Payroll routes (Enhanced)
+	// Allowances
+	protected.Post("/allowances", controllers.CreateAllowance)
+	protected.Post("/allowances/bulk", controllers.CreateBulkAllowances)
+	protected.Get("/allowances", controllers.GetAllowances)
+	protected.Delete("/allowances/:id", controllers.DeleteAllowance)
+	
+	// Deductions
+	protected.Post("/deductions", controllers.CreateDeduction)
+	protected.Post("/deductions/bulk", controllers.CreateBulkDeductions)
+	protected.Get("/deductions", controllers.GetDeductions)
+	protected.Delete("/deductions/:id", controllers.DeleteDeduction)
+	
+	// Payroll
+	protected.Post("/payroll/generate", controllers.GeneratePayroll)
+	protected.Get("/payrolls", controllers.GetPayrolls)
+	protected.Get("/payroll/summary", controllers.GetPayrollSummary)
+	protected.Get("/payroll/dashboard", controllers.GetPayrollDashboard)
+	protected.Get("/payroll/export/csv", controllers.ExportPayrollCSV)
+	protected.Get("/payroll/:employee_id", controllers.GetPayrollDetail)
+	protected.Put("/payroll/:id", controllers.UpdatePayroll)
+	protected.Patch("/payroll/:id/status", controllers.UpdatePayrollStatus)
+
 	// Admin/HR only routes with RBAC
 	adminRoutes := protected.Group("/", middleware.RequireRoles(config.DB, "admin"))
 	adminRoutes.Delete("/employees/:id", controllers.DeleteEmployee)
