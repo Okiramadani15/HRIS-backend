@@ -1,0 +1,661 @@
+{
+	"info": {
+		"_postman_id": "rbac-testing-collection-2024",
+		"name": "HRIS RBAC Testing Collection",
+		"description": "Complete RBAC testing scenarios for HRIS Backend",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Setup Roles & Users",
+			"item": [
+				{
+					"name": "Create Admin Role",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ADMIN_TOKEN}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"admin\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/roles",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "roles"]
+						}
+					}
+				},
+				{
+					"name": "Create HR Role",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ADMIN_TOKEN}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"hr\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/roles",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "roles"]
+						}
+					}
+				},
+				{
+					"name": "Create Employee Role",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ADMIN_TOKEN}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"employee\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/roles",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "roles"]
+						}
+					}
+				},
+				{
+					"name": "Create Admin User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    if (response.user && response.user.id) {",
+									"        pm.environment.set('ADMIN_USER_ID', response.user.id);",
+									"    }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ADMIN_TOKEN}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Super Admin\",\n    \"email\": \"admin@hris.com\",\n    \"password\": \"admin123\",\n    \"role_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/users/create-with-role",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "users", "create-with-role"]
+						}
+					}
+				},
+				{
+					"name": "Create HR User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    if (response.user && response.user.id) {",
+									"        pm.environment.set('HR_USER_ID', response.user.id);",
+									"    }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ADMIN_TOKEN}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"HR Manager\",\n    \"email\": \"hr@hris.com\",\n    \"password\": \"hr123\",\n    \"role_id\": 2\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/users/create-with-role",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "users", "create-with-role"]
+						}
+					}
+				},
+				{
+					"name": "Create Employee User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    if (response.user && response.user.id) {",
+									"        pm.environment.set('EMPLOYEE_USER_ID', response.user.id);",
+									"    }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ADMIN_TOKEN}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Regular Employee\",\n    \"email\": \"employee@hris.com\",\n    \"password\": \"emp123\",\n    \"role_id\": 3\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/users/create-with-role",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "users", "create-with-role"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Login Different Roles",
+			"item": [
+				{
+					"name": "Login as Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.data && response.data.token) {",
+									"        pm.environment.set('ADMIN_TOKEN', response.data.token);",
+									"        console.log('Admin token saved');",
+									"    }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@hris.com\",\n    \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/login",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "login"]
+						}
+					}
+				},
+				{
+					"name": "Login as HR",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.data && response.data.token) {",
+									"        pm.environment.set('HR_TOKEN', response.data.token);",
+									"        console.log('HR token saved');",
+									"    }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"hr@hris.com\",\n    \"password\": \"hr123\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/login",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "login"]
+						}
+					}
+				},
+				{
+					"name": "Login as Employee",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.data && response.data.token) {",
+									"        pm.environment.set('EMPLOYEE_TOKEN', response.data.token);",
+									"        console.log('Employee token saved');",
+									"    }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"employee@hris.com\",\n    \"password\": \"emp123\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/login",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "login"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Test Admin Access",
+			"item": [
+				{
+					"name": "Admin - Create Employee (Should Work)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ADMIN_TOKEN}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": {{ADMIN_USER_ID}},\n    \"full_name\": \"Admin Employee\",\n    \"phone\": \"081234567890\",\n    \"address\": \"Jakarta\",\n    \"date_of_birth\": \"1990-01-01\",\n    \"gender\": \"male\",\n    \"position\": \"System Administrator\",\n    \"department\": \"IT\",\n    \"hire_date\": \"2024-01-01\",\n    \"salary\": 15000000\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/employees",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "employees"]
+						}
+					}
+				},
+				{
+					"name": "Admin - Delete Employee (Should Work)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ADMIN_TOKEN}}"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/api/employees/1",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "employees", "1"]
+						}
+					}
+				},
+				{
+					"name": "Admin - Manage Roles (Should Work)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ADMIN_TOKEN}}"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/api/roles",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "roles"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Test HR Access",
+			"item": [
+				{
+					"name": "HR - Create Employee (Should Work)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{HR_TOKEN}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": {{HR_USER_ID}},\n    \"full_name\": \"HR Employee\",\n    \"phone\": \"081234567891\",\n    \"address\": \"Jakarta\",\n    \"date_of_birth\": \"1988-05-15\",\n    \"gender\": \"female\",\n    \"position\": \"HR Manager\",\n    \"department\": \"Human Resources\",\n    \"hire_date\": \"2023-06-01\",\n    \"salary\": 12000000\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/employees",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "employees"]
+						}
+					}
+				},
+				{
+					"name": "HR - Delete Employee (Should Fail - Admin Only)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{HR_TOKEN}}"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/api/employees/1",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "employees", "1"]
+						}
+					}
+				},
+				{
+					"name": "HR - View Employees (Should Work)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{HR_TOKEN}}"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/api/employees",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "employees"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "5. Test Employee Access",
+			"item": [
+				{
+					"name": "Employee - Create Employee (Should Fail)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{EMPLOYEE_TOKEN}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": {{EMPLOYEE_USER_ID}},\n    \"full_name\": \"Test Employee\",\n    \"phone\": \"081234567892\",\n    \"address\": \"Jakarta\",\n    \"date_of_birth\": \"1992-03-10\",\n    \"gender\": \"male\",\n    \"position\": \"Staff\",\n    \"department\": \"Operations\",\n    \"hire_date\": \"2024-01-15\",\n    \"salary\": 8000000\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/employees",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "employees"]
+						}
+					}
+				},
+				{
+					"name": "Employee - Delete Employee (Should Fail)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{EMPLOYEE_TOKEN}}"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/api/employees/1",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "employees", "1"]
+						}
+					}
+				},
+				{
+					"name": "Employee - View Employees (Should Work)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{EMPLOYEE_TOKEN}}"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/api/employees",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "employees"]
+						}
+					}
+				},
+				{
+					"name": "Employee - View Own Profile (Should Work)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{EMPLOYEE_TOKEN}}"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/api/my-profile",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "my-profile"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "6. Test Role Assignment",
+			"item": [
+				{
+					"name": "Admin - Assign HR Role to User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ADMIN_TOKEN}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": {{EMPLOYEE_USER_ID}},\n    \"role_id\": 2\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/assign-role",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "assign-role"]
+						}
+					}
+				},
+				{
+					"name": "Employee - Try Role Management (Should Fail)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{EMPLOYEE_TOKEN}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": 1,\n    \"role_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/assign-role",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "assign-role"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "7. Test Invalid Access",
+			"item": [
+				{
+					"name": "No Token - Should Fail",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/employees",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "employees"]
+						}
+					}
+				},
+				{
+					"name": "Invalid Token - Should Fail",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer invalid_token_here"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/api/employees",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "employees"]
+						}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "BASE_URL",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "ADMIN_TOKEN",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "HR_TOKEN",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "EMPLOYEE_TOKEN",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "ADMIN_USER_ID",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "HR_USER_ID",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "EMPLOYEE_USER_ID",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

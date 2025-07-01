@@ -1,18 +1,31 @@
 package controllers
 
 import (
+	"fmt"
 	"hris-backend/config"
 	"hris-backend/models"
+	"hris-backend/utils"
 	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
 
+// generateEmployeeID generates unique employee ID
+func generateEmployeeID() string {
+	// Get current count of employees
+	var count int64
+	config.DB.Model(&models.Employee{}).Count(&count)
+	
+	// Generate ID with format EMP + 4 digit number
+	return fmt.Sprintf("EMP%04d", count+1)
+}
+
 // Create Employee
 func CreateEmployee(c *fiber.Ctx) error {
 	type EmployeeInput struct {
-		EmployeeID  string  `json:"employee_id"`
+		UserID      uint    `json:"user_id"`
+		EmployeeID  string  `json:"employee_id"` // Optional, will auto-generate if empty
 		FullName    string  `json:"full_name"`
 		Phone       string  `json:"phone"`
 		Address     string  `json:"address"`
@@ -27,6 +40,11 @@ func CreateEmployee(c *fiber.Ctx) error {
 	var input EmployeeInput
 	if err := c.BodyParser(&input); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid input"})
+	}
+
+	// Auto-generate Employee ID if not provided
+	if strings.TrimSpace(input.EmployeeID) == "" {
+		input.EmployeeID = generateEmployeeID()
 	}
 
 	// Get user ID from JWT
@@ -47,12 +65,18 @@ func CreateEmployee(c *fiber.Ctx) error {
 	}
 
 	// Validate required fields
-	if input.EmployeeID == "" || input.FullName == "" || input.Position == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Employee ID, full name, and position are required"})
+	if input.FullName == "" || input.Position == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Full name and position are required"})
+	}
+
+	// Check if Employee ID already exists
+	var existingEmployee models.Employee
+	if err := config.DB.Where("employee_id = ?", strings.TrimSpace(input.EmployeeID)).First(&existingEmployee).Error; err == nil {
+		return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "Employee ID already exists"})
 	}
 
 	employee := models.Employee{
-		UserID:      uint(userID.(float64)),
+		UserID:      input.UserID,
 		EmployeeID:  strings.TrimSpace(input.EmployeeID),
 		FullName:    strings.TrimSpace(input.FullName),
 		Phone:       strings.TrimSpace(input.Phone),
@@ -107,111 +131,130 @@ func GetEmployee(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"employee": employee})
 }
 
-// Update Employee
+// UpdateInput represents input for updating employee
+type UpdateInput struct {
+	FullName    string  `json:"full_name"`
+	Phone       string  `json:"phone"`
+	Address     string  `json:"address"`
+	DateOfBirth string  `json:"date_of_birth"`
+	Gender      string  `json:"gender"`
+	Position    string  `json:"position"`
+	Department  string  `json:"department"`
+	HireDate    string  `json:"hire_date"`
+	Salary      float64 `json:"salary"`
+	Status      string  `json:"status"`
+}
+
+// UpdateEmployee updates employee with pointer optimization
 func UpdateEmployee(c *fiber.Ctx) error {
 	id := c.Params("id")
-
-	var employee models.Employee
-	result := config.DB.First(&employee, id)
-	if result.Error != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Employee not found"})
+	if strings.TrimSpace(id) == "" {
+		panic("Employee ID parameter cannot be empty")
 	}
 
-	type UpdateInput struct {
-		FullName    string  `json:"full_name"`
-		Phone       string  `json:"phone"`
-		Address     string  `json:"address"`
-		DateOfBirth string  `json:"date_of_birth"`
-		Gender      string  `json:"gender"`
-		Position    string  `json:"position"`
-		Department  string  `json:"department"`
-		HireDate    string  `json:"hire_date"`
-		Salary      float64 `json:"salary"`
-		Status      string  `json:"status"`
+	employee := &models.Employee{}
+	if err := config.DB.First(employee, id).Error; err != nil {
+		return utils.NotFoundResponse(c, "Employee not found")
 	}
 
-	var input UpdateInput
-	if err := c.BodyParser(&input); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid input"})
+	input := &UpdateInput{}
+	if err := c.BodyParser(input); err != nil {
+		return utils.ValidationErrorResponse(c, "Invalid input format")
 	}
 
-	// Update fields if provided
-	if input.FullName != "" {
+	// Update fields if provided using pointer dereferencing
+	if strings.TrimSpace(input.FullName) != "" {
 		employee.FullName = strings.TrimSpace(input.FullName)
 	}
-	if input.Phone != "" {
+	if strings.TrimSpace(input.Phone) != "" {
 		employee.Phone = strings.TrimSpace(input.Phone)
 	}
-	if input.Address != "" {
+	if strings.TrimSpace(input.Address) != "" {
 		employee.Address = strings.TrimSpace(input.Address)
 	}
-	if input.DateOfBirth != "" {
-		if dob, err := time.Parse("2006-01-02", input.DateOfBirth); err == nil {
+	if strings.TrimSpace(input.DateOfBirth) != "" {
+		if dob, err := time.Parse("2006-01-02T15:04:05Z", input.DateOfBirth); err == nil {
+			employee.DateOfBirth = dob
+		} else if dob, err := time.Parse("2006-01-02", input.DateOfBirth); err == nil {
 			employee.DateOfBirth = dob
 		}
 	}
-	if input.Gender != "" {
+	if strings.TrimSpace(input.Gender) != "" {
 		employee.Gender = strings.TrimSpace(input.Gender)
 	}
-	if input.Position != "" {
+	if strings.TrimSpace(input.Position) != "" {
 		employee.Position = strings.TrimSpace(input.Position)
 	}
-	if input.Department != "" {
+	if strings.TrimSpace(input.Department) != "" {
 		employee.Department = strings.TrimSpace(input.Department)
 	}
-	if input.HireDate != "" {
-		if hireDate, err := time.Parse("2006-01-02", input.HireDate); err == nil {
+	if strings.TrimSpace(input.HireDate) != "" {
+		if hireDate, err := time.Parse("2006-01-02T15:04:05Z", input.HireDate); err == nil {
+			employee.HireDate = hireDate
+		} else if hireDate, err := time.Parse("2006-01-02", input.HireDate); err == nil {
 			employee.HireDate = hireDate
 		}
 	}
 	if input.Salary > 0 {
 		employee.Salary = input.Salary
 	}
-	if input.Status != "" {
+	if strings.TrimSpace(input.Status) != "" {
 		employee.Status = strings.TrimSpace(input.Status)
 	}
 
-	result = config.DB.Save(&employee)
-	if result.Error != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to update employee"})
+	if err := config.DB.Save(employee).Error; err != nil {
+		return utils.InternalErrorResponse(c, err.Error())
 	}
 
-	return c.JSON(fiber.Map{
-		"message":  "Employee updated successfully",
-		"employee": employee,
-	})
+	// Load updated employee with user relationship
+	config.DB.Preload("User").First(employee, employee.ID)
+
+	return utils.SuccessResponse(c, "Employee updated successfully", employee)
 }
 
-// Delete Employee
+// DeleteEmployee deletes employee with panic on critical errors
 func DeleteEmployee(c *fiber.Ctx) error {
 	id := c.Params("id")
-
-	var employee models.Employee
-	result := config.DB.First(&employee, id)
-	if result.Error != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Employee not found"})
+	if strings.TrimSpace(id) == "" {
+		panic("Employee ID parameter cannot be empty")
 	}
 
-	result = config.DB.Delete(&employee)
-	if result.Error != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to delete employee"})
+	employee := &models.Employee{}
+	if err := config.DB.First(employee, id).Error; err != nil {
+		return utils.NotFoundResponse(c, "Employee not found")
 	}
 
-	return c.JSON(fiber.Map{"message": "Employee deleted successfully"})
+	// Check if employee has related records (attendances, leave requests)
+	var attendanceCount, leaveRequestCount int64
+	config.DB.Model(&models.Attendance{}).Where("employee_id = ?", employee.EmployeeID).Count(&attendanceCount)
+	config.DB.Model(&models.LeaveRequest{}).Where("employee_id = ?", employee.EmployeeID).Count(&leaveRequestCount)
+	
+	if attendanceCount > 0 || leaveRequestCount > 0 {
+		return utils.ValidationErrorResponse(c, "Cannot delete employee with existing attendance or leave records")
+	}
+
+	result := config.DB.Delete(employee)
+	if result.Error != nil {
+		return utils.InternalErrorResponse(c, result.Error.Error())
+	}
+	if result.RowsAffected == 0 {
+		panic("Employee not found for deletion")
+	}
+
+	return utils.SuccessResponse(c, "Employee deleted successfully", nil)
 }
 
-// Get My Employee Profile
+// GetMyProfile retrieves current user's employee profile
 func GetMyProfile(c *fiber.Ctx) error {
 	userID := c.Locals("user_id")
 	if userID == nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "User not found"})
+		return utils.ValidationErrorResponse(c, "User not authenticated")
 	}
 
-	var employee models.Employee
-	result := config.DB.Preload("User").Where("user_id = ?", userID).First(&employee)
-	if result.Error != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Employee profile not found"})
+	employee := &models.Employee{}
+	if err := config.DB.Preload("User").Where("user_id = ?", userID).First(employee).Error; err != nil {
+		return utils.NotFoundResponse(c, "Employee profile not found")
 	}
 
-	return c.JSON(fiber.Map{"employee": employee})
+	return utils.SuccessResponse(c, "Employee profile retrieved successfully", employee)
 }

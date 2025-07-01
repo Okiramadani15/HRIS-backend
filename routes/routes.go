@@ -16,7 +16,7 @@ func SetupRoutes(app *fiber.App) {
 	api.Post("/login", controllers.Login)
 
 	// Protected routes
-	protected := api.Group("/", middleware.JWTMiddleware)
+	protected := api.Group("/", middleware.JWTMiddlewareWithDB(config.DB))
 	protected.Get("/profile", getProfile)
 
 	// Employee routes
@@ -123,6 +123,22 @@ func SetupRoutes(app *fiber.App) {
 	protected.Get("/leave-requests", controllers.GetLeaveRequests)
 	protected.Get("/leave-requests/:id", controllers.GetLeaveRequestByID)
 	protected.Put("/leave-requests/:id/status", controllers.UpdateLeaveStatus)
+
+	// Role Management routes (Admin only)
+	protected.Post("/roles", controllers.CreateRole)
+	protected.Get("/roles", controllers.GetRoles)
+	protected.Get("/roles/:id", controllers.GetRoleByID)
+	protected.Put("/roles/:id", controllers.UpdateRole)
+	protected.Delete("/roles/:id", controllers.DeleteRole)
+	protected.Post("/users/create-with-role", controllers.CreateUserWithRole)
+	protected.Post("/assign-role", controllers.AssignUserRole)
+
+	// Admin/HR only routes with RBAC
+	adminRoutes := protected.Group("/", middleware.RequireRoles(config.DB, "admin"))
+	adminRoutes.Delete("/employees/:id", controllers.DeleteEmployee)
+	
+	hrRoutes := protected.Group("/", middleware.RequireRoles(config.DB, "admin", "hr"))
+	hrRoutes.Post("/employees", controllers.CreateEmployee)
 
 }
 

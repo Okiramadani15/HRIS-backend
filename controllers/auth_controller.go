@@ -14,6 +14,7 @@ func Register(c *fiber.Ctx) error {
 		Name     string `json:"name"`
 		Email    string `json:"email"`
 		Password string `json:"password"`
+		RoleID   uint   `json:"role_id,omitempty"` // Optional, defaults to employee
 	}
 
 	var input RegisterInput
@@ -35,10 +36,22 @@ func Register(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Error hashing password"})
 	}
 
+	// Set default role to employee if not provided
+	roleID := input.RoleID
+	if roleID == 0 {
+		// Get employee role ID
+		var employeeRole models.Role
+		if err := config.DB.Where("name = ?", "employee").First(&employeeRole).Error; err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Default role not found"})
+		}
+		roleID = employeeRole.ID
+	}
+
 	user := models.User{
 		Name:     input.Name,
 		Email:    input.Email,
 		Password: hash,
+		RoleID:   roleID,
 	}
 
 	result := config.DB.Create(&user)

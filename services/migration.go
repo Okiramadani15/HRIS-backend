@@ -12,6 +12,7 @@ func RunMigrations(db *gorm.DB) {
 
 	// Migrate base tables first
 	if err := db.AutoMigrate(
+		&models.Role{},
 		&models.User{},
 		&models.Position{},
 		&models.Department{},
@@ -42,5 +43,25 @@ func RunMigrations(db *gorm.DB) {
 		log.Fatal("Failed to migrate tables with foreign keys:", err)
 	}
 
+	// Seed default roles
+	seedRoles(db)
+
 	log.Println("Database migrations completed successfully")
+}
+
+// seedRoles creates default roles if they don't exist
+func seedRoles(db *gorm.DB) {
+	defaultRoles := []string{"admin", "hr", "employee"}
+
+	for _, roleName := range defaultRoles {
+		var count int64
+		db.Model(&models.Role{}).Where("name = ?", roleName).Count(&count)
+		if count == 0 {
+			if err := db.Create(&models.Role{Name: roleName}).Error; err != nil {
+				log.Printf("Failed to create role '%s': %v", roleName, err)
+			} else {
+				log.Printf("Seeded role '%s'", roleName)
+			}
+		}
+	}
 }

@@ -1,0 +1,552 @@
+{
+	"info": {
+		"_postman_id": "hris-api-collection-2024",
+		"name": "HRIS API Collection",
+		"description": "Complete API collection for HRIS Backend with Go Fiber",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Admin User\",\n    \"email\": \"admin@hris.com\",\n    \"password\": \"password123\",\n    \"role_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/register",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "register"]
+						}
+					}
+				},
+				{
+					"name": "Login User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.data && response.data.token) {",
+									"        pm.environment.set('JWT_TOKEN', response.data.token);",
+									"        console.log('JWT Token saved to environment');",
+									"    }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@hris.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/login",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "login"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Employee Management",
+			"item": [
+				{
+					"name": "Create Employee (HR/Admin Only)",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Auto-generate Employee ID",
+									"const timestamp = Date.now().toString().slice(-4);",
+									"const employeeId = 'EMP' + timestamp;",
+									"pm.environment.set('EMPLOYEE_ID', employeeId);",
+									"console.log('Generated Employee ID:', employeeId);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{JWT_TOKEN}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": 1,\n    \"employee_id\": \"{{EMPLOYEE_ID}}\",\n    \"full_name\": \"John Doe\",\n    \"phone\": \"081234567890\",\n    \"address\": \"Jakarta Selatan\",\n    \"date_of_birth\": \"1990-01-01T00:00:00Z\",\n    \"gender\": \"male\",\n    \"position\": \"Software Developer\",\n    \"department\": \"Information Technology\",\n    \"hire_date\": \"2024-01-01T00:00:00Z\",\n    \"salary\": 10000000,\n    \"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/employees",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "employees"]
+						}
+					}
+				},
+				{
+					"name": "Create HR Employee",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const timestamp = Date.now().toString().slice(-4);",
+									"const employeeId = 'HR' + timestamp;",
+									"pm.environment.set('HR_EMPLOYEE_ID', employeeId);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{JWT_TOKEN}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": 2,\n    \"employee_id\": \"{{HR_EMPLOYEE_ID}}\",\n    \"full_name\": \"Jane Smith\",\n    \"phone\": \"081234567891\",\n    \"address\": \"Jakarta Pusat\",\n    \"date_of_birth\": \"1988-05-15T00:00:00Z\",\n    \"gender\": \"female\",\n    \"position\": \"HR Manager\",\n    \"department\": \"Human Resources\",\n    \"hire_date\": \"2023-06-01T00:00:00Z\",\n    \"salary\": 12000000,\n    \"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/employees",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "employees"]
+						}
+					}
+				},
+				{
+					"name": "Get All Employees",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{JWT_TOKEN}}"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/api/employees",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "employees"]
+						}
+					}
+				},
+				{
+					"name": "Get Employee by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{JWT_TOKEN}}"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/api/employees/1",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "employees", "1"]
+						}
+					}
+				},
+				{
+					"name": "Update Employee",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{JWT_TOKEN}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"full_name\": \"John Doe Updated\",\n    \"phone\": \"081234567899\",\n    \"salary\": 12000000,\n    \"position\": \"Senior Developer\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/employees/1",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "employees", "1"]
+						}
+					}
+				},
+				{
+					"name": "Delete Employee (Admin Only)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{JWT_TOKEN}}"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/api/employees/1",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "employees", "1"]
+						}
+					}
+				},
+				{
+					"name": "Get My Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{JWT_TOKEN}}"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/api/my-profile",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "my-profile"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Attendance Management",
+			"item": [
+				{
+					"name": "Create Attendance",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{JWT_TOKEN}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"employee_id\": \"EMP001\",\n    \"date\": \"2024-06-25T00:00:00Z\",\n    \"check_in\": \"2024-06-25T08:00:00Z\",\n    \"check_out\": \"2024-06-25T17:00:00Z\",\n    \"status\": \"present\",\n    \"note\": \"On time\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/attendances",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "attendances"]
+						}
+					}
+				},
+				{
+					"name": "Get All Attendances",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{JWT_TOKEN}}"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/api/attendances",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "attendances"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Role Management",
+			"item": [
+				{
+					"name": "Create Role (Admin Only)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{JWT_TOKEN}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"admin\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/roles",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "roles"]
+						}
+					}
+				},
+				{
+					"name": "Create HR Role",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{JWT_TOKEN}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"hr\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/roles",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "roles"]
+						}
+					}
+				},
+				{
+					"name": "Create Employee Role",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{JWT_TOKEN}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"employee\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/roles",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "roles"]
+						}
+					}
+				},
+				{
+					"name": "Get All Roles",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{JWT_TOKEN}}"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/api/roles",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "roles"]
+						}
+					}
+				},
+				{
+					"name": "Get Role by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{JWT_TOKEN}}"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/api/roles/1",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "roles", "1"]
+						}
+					}
+				},
+				{
+					"name": "Update Role (Admin Only)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{JWT_TOKEN}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"super_admin\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/roles/1",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "roles", "1"]
+						}
+					}
+				},
+				{
+					"name": "Assign Role to User (Admin Only)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{JWT_TOKEN}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": 2,\n    \"role_id\": 2\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/assign-role",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "assign-role"]
+						}
+					}
+				},
+				{
+					"name": "Delete Role (Admin Only)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{JWT_TOKEN}}"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/api/roles/3",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "roles", "3"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Leave Management",
+			"item": [
+				{
+					"name": "Create Leave Type",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{JWT_TOKEN}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Annual Leave\",\n    \"description\": \"Yearly vacation leave\",\n    \"max_days\": 12\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/leave-types",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "leave-types"]
+						}
+					}
+				},
+				{
+					"name": "Create Leave Request",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{JWT_TOKEN}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"employee_id\": \"EMP001\",\n    \"leave_type_id\": 1,\n    \"start_date\": \"2024-07-01T00:00:00Z\",\n    \"end_date\": \"2024-07-05T00:00:00Z\",\n    \"reason\": \"Family vacation\"\n}"
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/leave-requests",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "leave-requests"]
+						}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "BASE_URL",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "JWT_TOKEN",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "EMPLOYEE_ID",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "HR_EMPLOYEE_ID",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
