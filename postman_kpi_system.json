@@ -1,0 +1,189 @@
+{
+  "info": {
+    "name": "KPI Management System",
+    "description": "Complete KPI system for performance management"
+  },
+  "item": [
+    {
+      "name": "KPI Categories",
+      "item": [
+        {
+          "name": "Create KPI Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sales Performance\",\n  \"description\": \"Sales and revenue related KPIs\",\n  \"is_active\": true\n}"
+            },
+            "url": "http://localhost:3000/api/kpi/categories"
+          }
+        },
+        {
+          "name": "Get KPI Categories",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {
+              "raw": "http://localhost:3000/api/kpi/categories?active=true",
+              "query": [{"key": "active", "value": "true"}]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "KPI Metrics",
+      "item": [
+        {
+          "name": "Create KPI Metric",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category_id\": 1,\n  \"name\": \"Monthly Sales Target\",\n  \"description\": \"Monthly sales achievement in rupiah\",\n  \"unit\": \"IDR\",\n  \"target_type\": \"higher_better\",\n  \"weight\": 2.0,\n  \"is_active\": true\n}"
+            },
+            "url": "http://localhost:3000/api/kpi/metrics"
+          }
+        },
+        {
+          "name": "Get KPI Metrics",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {
+              "raw": "http://localhost:3000/api/kpi/metrics?category_id=1&active=true",
+              "query": [
+                {"key": "category_id", "value": "1"},
+                {"key": "active", "value": "true"}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "KPI Targets",
+      "item": [
+        {
+          "name": "Set KPI Target",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employee_id\": \"EMP0010\",\n  \"metric_id\": 1,\n  \"period\": \"2025-07\",\n  \"period_type\": \"monthly\",\n  \"target_value\": 50000000,\n  \"min_value\": 40000000,\n  \"max_value\": 60000000\n}"
+            },
+            "url": "http://localhost:3000/api/kpi/targets"
+          }
+        },
+        {
+          "name": "Set Bulk KPI Targets",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targets\": [\n    {\n      \"employee_id\": \"EMP0010\",\n      \"metric_id\": 1,\n      \"period\": \"2025-07\",\n      \"period_type\": \"monthly\",\n      \"target_value\": 50000000\n    },\n    {\n      \"employee_id\": \"EMP0010\",\n      \"metric_id\": 2,\n      \"period\": \"2025-07\",\n      \"period_type\": \"monthly\",\n      \"target_value\": 95.0\n    }\n  ]\n}"
+            },
+            "url": "http://localhost:3000/api/kpi/targets/bulk"
+          }
+        },
+        {
+          "name": "Get KPI Targets",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {
+              "raw": "http://localhost:3000/api/kpi/targets?employee_id=EMP0010&period=2025-07",
+              "query": [
+                {"key": "employee_id", "value": "EMP0010"},
+                {"key": "period", "value": "2025-07"}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "KPI Actuals",
+      "item": [
+        {
+          "name": "Record KPI Actual",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employee_id\": \"EMP0010\",\n  \"metric_id\": 1,\n  \"period\": \"2025-07\",\n  \"period_type\": \"monthly\",\n  \"actual_value\": 55000000,\n  \"notes\": \"Exceeded target by 10%\"\n}"
+            },
+            "url": "http://localhost:3000/api/kpi/actuals"
+          }
+        },
+        {
+          "name": "Get KPI Actuals",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {
+              "raw": "http://localhost:3000/api/kpi/actuals?employee_id=EMP0010&period=2025-07",
+              "query": [
+                {"key": "employee_id", "value": "EMP0010"},
+                {"key": "period", "value": "2025-07"}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "KPI Dashboard & Reports",
+      "item": [
+        {
+          "name": "Get KPI Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {
+              "raw": "http://localhost:3000/api/kpi/dashboard?employee_id=EMP0010&period=2025-07",
+              "query": [
+                {"key": "employee_id", "value": "EMP0010"},
+                {"key": "period", "value": "2025-07"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get KPI Report",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {
+              "raw": "http://localhost:3000/api/kpi/report?period=2025-07&period_type=monthly",
+              "query": [
+                {"key": "period", "value": "2025-07"},
+                {"key": "period_type", "value": "monthly"}
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

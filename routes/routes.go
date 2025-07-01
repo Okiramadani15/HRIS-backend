@@ -160,6 +160,32 @@ func SetupRoutes(app *fiber.App) {
 	protected.Get("/payrolls", controllers.GetPayrolls)
 	protected.Get("/payroll/:employee_id", controllers.GetPayrollDetail)
 
+	// KPI Management (HR/Admin Only)
+	kpiRoutes := protected.Group("/", middleware.RequireRoles(config.DB, "admin", "hr"))
+	
+	// KPI Categories
+	kpiRoutes.Post("/kpi/categories", controllers.CreateKPICategory)
+	kpiRoutes.Get("/kpi/categories", controllers.GetKPICategories)
+	
+	// KPI Metrics
+	kpiRoutes.Post("/kpi/metrics", controllers.CreateKPIMetric)
+	kpiRoutes.Get("/kpi/metrics", controllers.GetKPIMetrics)
+	
+	// KPI Targets
+	kpiRoutes.Post("/kpi/targets", controllers.SetKPITarget)
+	kpiRoutes.Post("/kpi/targets/bulk", controllers.SetBulkKPITargets)
+	kpiRoutes.Get("/kpi/targets", controllers.GetKPITargets)
+	
+	// KPI Actuals
+	kpiRoutes.Post("/kpi/actuals", controllers.RecordKPIActual)
+	kpiRoutes.Get("/kpi/actuals", controllers.GetKPIActuals)
+	
+	// KPI Reports
+	kpiRoutes.Get("/kpi/report", controllers.GetKPIReport)
+	
+	// KPI Dashboard (All authenticated users can view their own)
+	protected.Get("/kpi/dashboard", controllers.GetKPIDashboard)
+
 	// Admin/HR only routes with RBAC
 	adminRoutes := protected.Group("/", middleware.RequireRoles(config.DB, "admin"))
 	adminRoutes.Delete("/employees/:id", controllers.DeleteEmployee)

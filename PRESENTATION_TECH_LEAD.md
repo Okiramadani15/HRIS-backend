@@ -108,6 +108,21 @@ Leave Request → Approval Workflow → Balance Tracking → Reporting
 - Leave balance management
 - Leave type configuration
 
+### **6. KPI Management System**
+```
+KPI Setup → Target Setting → Performance Tracking → Evaluation & Grading
+```
+
+**Key Features:**
+- Multi-category KPI metrics (Sales, Quality, Productivity, etc.)
+- Flexible target types (higher_better, lower_better, exact)
+- Automated achievement calculation
+- Weighted scoring system
+- Performance grading (A-E scale)
+- Individual & company-wide reporting
+- Bulk target setting
+- Real-time dashboard analytics
+
 ---
 
 ## 🔧 Technical Implementation
@@ -260,6 +275,75 @@ LeaveRequests (id, employee_id, type, start_date, end_date, status)
    GET /api/leave-requests?employee_id=EMP001&status=pending
 ```
 
+### **KPI Management Flow**
+```
+1. Create KPI Category
+   POST /api/kpi/categories
+   Body: {
+     "name": "Sales Performance",
+     "description": "Sales and revenue related KPIs"
+   }
+
+2. Create KPI Metric
+   POST /api/kpi/metrics
+   Body: {
+     "category_id": 1,
+     "name": "Monthly Sales Target",
+     "unit": "IDR",
+     "target_type": "higher_better",
+     "weight": 2.0
+   }
+
+3. Set KPI Target (Bulk)
+   POST /api/kpi/targets/bulk
+   Body: {
+     "targets": [
+       {
+         "employee_id": "EMP001",
+         "metric_id": 1,
+         "period": "2025-07",
+         "period_type": "monthly",
+         "target_value": 50000000
+       }
+     ]
+   }
+
+4. Record KPI Achievement
+   POST /api/kpi/actuals
+   Body: {
+     "employee_id": "EMP001",
+     "metric_id": 1,
+     "period": "2025-07",
+     "actual_value": 55000000,
+     "notes": "Exceeded target by 10%"
+   }
+   Response: {
+     "achievement": 110.0,
+     "score": 2.2,
+     "grade": "A"
+   }
+
+5. Get KPI Dashboard
+   GET /api/kpi/dashboard?employee_id=EMP001&period=2025-07
+   Response: {
+     "total_metrics": 5,
+     "completed_kpis": 4,
+     "average_score": 92.5,
+     "grade": "A"
+   }
+
+6. Get Company KPI Report
+   GET /api/kpi/report?period=2025-07
+   Response: [
+     {
+       "employee_id": "EMP001",
+       "employee_name": "John Doe",
+       "average_score": 92.5,
+       "grade": "A"
+     }
+   ]
+```
+
 ---
 
 ## 📊 Complete API Endpoints
@@ -321,6 +405,30 @@ POST /api/leave-requests           # Create leave request
 GET  /api/leave-requests           # Get leave requests
 GET  /api/leave-requests/:id       # Get leave request by ID
 PUT  /api/leave-requests/:id/status # Update leave status
+```
+
+### **KPI Management System (12 endpoints)**
+```
+# KPI Categories
+POST   /api/kpi/categories      # Create KPI category
+GET    /api/kpi/categories      # Get KPI categories
+
+# KPI Metrics
+POST   /api/kpi/metrics         # Create KPI metric
+GET    /api/kpi/metrics         # Get KPI metrics
+
+# KPI Targets
+POST   /api/kpi/targets         # Set KPI target
+POST   /api/kpi/targets/bulk    # Set bulk KPI targets
+GET    /api/kpi/targets         # Get KPI targets
+
+# KPI Actuals
+POST   /api/kpi/actuals         # Record KPI actual
+GET    /api/kpi/actuals         # Get KPI actuals
+
+# KPI Analytics
+GET    /api/kpi/dashboard       # Get KPI dashboard
+GET    /api/kpi/report          # Get KPI report
 ```
 
 ### **Master Data Management (50+ endpoints)**
@@ -505,9 +613,10 @@ jobs:
 ## 🎯 Roadmap & Next Steps
 
 ### **Phase 1: Current (Completed)**
-✅ Complete HRIS system with 15+ modules  
-✅ 80+ API endpoints with full CRUD operations  
+✅ Complete HRIS system with 16+ modules  
+✅ 95+ API endpoints with full CRUD operations  
 ✅ Enhanced payroll system with reporting  
+✅ KPI Management System with performance tracking  
 ✅ Security implementation with JWT + RBAC  
 
 ### **Phase 2: Enhancements (Next 2 weeks)**
