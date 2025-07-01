@@ -133,28 +133,32 @@ func SetupRoutes(app *fiber.App) {
 	protected.Post("/users/create-with-role", controllers.CreateUserWithRole)
 	protected.Post("/assign-role", controllers.AssignUserRole)
 
-	// Payroll routes (Enhanced)
-	// Allowances
-	protected.Post("/allowances", controllers.CreateAllowance)
-	protected.Post("/allowances/bulk", controllers.CreateBulkAllowances)
+	// Payroll routes (Enhanced) - HR/Admin Only
+	payrollRoutes := protected.Group("/", middleware.RequireRoles(config.DB, "admin", "hr"))
+	
+	// Allowances (HR/Admin Only)
+	payrollRoutes.Post("/allowances", controllers.CreateAllowance)
+	payrollRoutes.Post("/allowances/bulk", controllers.CreateBulkAllowances)
+	payrollRoutes.Delete("/allowances/:id", controllers.DeleteAllowance)
+	
+	// Deductions (HR/Admin Only)
+	payrollRoutes.Post("/deductions", controllers.CreateDeduction)
+	payrollRoutes.Post("/deductions/bulk", controllers.CreateBulkDeductions)
+	payrollRoutes.Delete("/deductions/:id", controllers.DeleteDeduction)
+	
+	// Payroll Management (HR/Admin Only)
+	payrollRoutes.Post("/payroll/generate", controllers.GeneratePayroll)
+	payrollRoutes.Get("/payroll/summary", controllers.GetPayrollSummary)
+	payrollRoutes.Get("/payroll/dashboard", controllers.GetPayrollDashboard)
+	payrollRoutes.Get("/payroll/export/csv", controllers.ExportPayrollCSV)
+	payrollRoutes.Put("/payroll/:id", controllers.UpdatePayroll)
+	payrollRoutes.Patch("/payroll/:id/status", controllers.UpdatePayrollStatus)
+	
+	// Payroll View (All authenticated users can view)
 	protected.Get("/allowances", controllers.GetAllowances)
-	protected.Delete("/allowances/:id", controllers.DeleteAllowance)
-	
-	// Deductions
-	protected.Post("/deductions", controllers.CreateDeduction)
-	protected.Post("/deductions/bulk", controllers.CreateBulkDeductions)
 	protected.Get("/deductions", controllers.GetDeductions)
-	protected.Delete("/deductions/:id", controllers.DeleteDeduction)
-	
-	// Payroll
-	protected.Post("/payroll/generate", controllers.GeneratePayroll)
 	protected.Get("/payrolls", controllers.GetPayrolls)
-	protected.Get("/payroll/summary", controllers.GetPayrollSummary)
-	protected.Get("/payroll/dashboard", controllers.GetPayrollDashboard)
-	protected.Get("/payroll/export/csv", controllers.ExportPayrollCSV)
 	protected.Get("/payroll/:employee_id", controllers.GetPayrollDetail)
-	protected.Put("/payroll/:id", controllers.UpdatePayroll)
-	protected.Patch("/payroll/:id/status", controllers.UpdatePayrollStatus)
 
 	// Admin/HR only routes with RBAC
 	adminRoutes := protected.Group("/", middleware.RequireRoles(config.DB, "admin"))
