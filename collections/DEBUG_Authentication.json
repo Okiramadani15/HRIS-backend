@@ -246,6 +246,79 @@
         },
         "url": "{{baseUrl}}/employees"
       }
+    },
+    {
+      "name": "9. Logout HR",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    console.log('✅ HR logged out successfully');",
+              "    pm.collectionVariables.set('hrToken', '');",
+              "} else {",
+              "    console.log('❌ HR logout failed:', pm.response.text());",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+        ],
+        "url": "{{baseUrl}}/logout"
+      }
+    },
+    {
+      "name": "10. Test Access After Logout",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 401) {",
+              "    console.log('✅ Token properly invalidated - Access denied');",
+              "} else {",
+              "    console.log('❌ Token still valid after logout:', pm.response.code);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+        ],
+        "url": "{{baseUrl}}/profile"
+      }
+    },
+    {
+      "name": "11. Logout All Devices",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    console.log('✅ Logged out from all devices');",
+              "} else {",
+              "    console.log('❌ Logout all failed:', pm.response.text());",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{adminToken}}"}
+        ],
+        "url": "{{baseUrl}}/logout-all"
+      }
     }
   ]
 }

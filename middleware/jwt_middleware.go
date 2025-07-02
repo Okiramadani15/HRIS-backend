@@ -1,14 +1,54 @@
 package middleware
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"hris-backend/models"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"gorm.io/gorm"
 )
+
+// TokenBlacklist - Global blacklist untuk JWT tokens
+var TokenBlacklist = make(map[string]time.Time)
+
+// IsTokenBlacklisted - Check if token is blacklisted
+func IsTokenBlacklisted(tokenString string) bool {
+	tokenHash := hashToken(tokenString)
+	
+	expiryTime, exists := TokenBlacklist[tokenHash]
+	if !exists {
+		return false
+	}
+
+	// If token expiry has passed, remove from blacklist and return false
+	if time.Now().After(expiryTime) {
+		delete(TokenBlacklist, tokenHash)
+		return false
+	}
+
+	return true
+}
+
+// HashToken - Export hash function untuk controller
+func HashToken(token string) string {
+	hash := sha256.Sum256([]byte(token))
+	return hex.EncodeToString(hash[:])
+}
+
+func hashToken(token string) string {
+	return HashToken(token)
+}
+
+// AddToBlacklist - Add token to blacklist
+func AddToBlacklist(tokenString string, expiryTime time.Time) {
+	tokenHash := hashToken(tokenString)
+	TokenBlacklist[tokenHash] = expiryTime
+}
 
 // JWTMiddleware validates JWT token
 func JWTMiddleware(c *fiber.Ctx) error {
@@ -30,6 +70,11 @@ func JWTMiddlewareWithDB(db *gorm.DB) fiber.Handler {
 	} else {
 		tokenString = authHeader
 	}
+	// Check if token is blacklisted
+	if IsTokenBlacklisted(tokenString) {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Token has been revoked"})
+	}
+
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, jwt.NewValidationError("unexpected signing method", jwt.ValidationErrorSignatureInvalid)

@@ -12,6 +12,15 @@ import (
 
 var DB *gorm.DB
 
+// GetJWTSecret returns JWT secret from environment
+func GetJWTSecret() string {
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		return "your-secret-key" // fallback for development
+	}
+	return secret
+}
+
 func InitDB() {
 	err := godotenv.Load()
 	if err != nil {

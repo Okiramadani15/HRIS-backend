@@ -14,6 +14,10 @@ func SetupRoutes(app *fiber.App) {
 	api := app.Group("/api")
 	api.Post("/register", controllers.Register)
 	api.Post("/login", controllers.Login)
+	
+	// Logout routes (require authentication)
+	api.Post("/logout", middleware.JWTMiddlewareWithDB(config.DB), controllers.Logout)
+	api.Post("/logout-all", middleware.JWTMiddlewareWithDB(config.DB), controllers.LogoutAll)
 
 	// Protected routes
 	protected := api.Group("/", middleware.JWTMiddlewareWithDB(config.DB))
