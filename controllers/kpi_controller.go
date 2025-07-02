@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"hris-backend/config"
 	"hris-backend/models"
-	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -317,7 +316,6 @@ func GetKPIDashboard(c *fiber.Ctx) error {
 
 func GetKPIReport(c *fiber.Ctx) error {
 	period := c.Query("period")
-	periodType := c.Query("period_type")
 	
 	if period == "" {
 		return c.Status(400).JSON(fiber.Map{"error": "Period is required"})

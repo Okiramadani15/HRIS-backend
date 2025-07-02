@@ -19,13 +19,19 @@ func SetupRoutes(app *fiber.App) {
 	protected := api.Group("/", middleware.JWTMiddlewareWithDB(config.DB))
 	protected.Get("/profile", getProfile)
 
-	// Employee routes
+	// Employee routes (JWT protected)
 	protected.Post("/employees", controllers.CreateEmployee)
 	protected.Get("/employees", controllers.GetEmployees)
 	protected.Get("/employees/:id", controllers.GetEmployee)
 	protected.Put("/employees/:id", controllers.UpdateEmployee)
-	protected.Delete("/employees/:id", controllers.DeleteEmployee)
 	protected.Get("/my-profile", controllers.GetMyProfile)
+	
+	// Employee Photo routes (JWT protected)
+	protected.Post("/employees/:id/photo", controllers.UploadEmployeePhoto)
+	protected.Delete("/employees/:id/photo", controllers.DeleteEmployeePhoto)
+	
+	// Serve static files for uploads
+	app.Static("/uploads", "./uploads")
 
 	// Position routes
 	protected.Post("/positions", controllers.CreatePosition)
@@ -133,7 +139,12 @@ func SetupRoutes(app *fiber.App) {
 	protected.Post("/users/create-with-role", controllers.CreateUserWithRole)
 	protected.Post("/assign-role", controllers.AssignUserRole)
 
-	// Payroll routes (Enhanced) - HR/Admin Only
+	// Payroll View (All authenticated users can view) - MUST BE BEFORE RBAC ROUTES
+	protected.Get("/allowances", controllers.GetAllowances)
+	protected.Get("/deductions", controllers.GetDeductions)
+	protected.Get("/payrolls", controllers.GetPayrolls)
+
+	// Payroll routes (Enhanced) - HR/Admin Only - SPECIFIC ROUTES FIRST
 	payrollRoutes := protected.Group("/", middleware.RequireRoles(config.DB, "admin", "hr"))
 	
 	// Allowances (HR/Admin Only)
@@ -146,7 +157,7 @@ func SetupRoutes(app *fiber.App) {
 	payrollRoutes.Post("/deductions/bulk", controllers.CreateBulkDeductions)
 	payrollRoutes.Delete("/deductions/:id", controllers.DeleteDeduction)
 	
-	// Payroll Management (HR/Admin Only)
+	// Payroll Management (HR/Admin Only) - SPECIFIC ROUTES FIRST
 	payrollRoutes.Post("/payroll/generate", controllers.GeneratePayroll)
 	payrollRoutes.Get("/payroll/summary", controllers.GetPayrollSummary)
 	payrollRoutes.Get("/payroll/dashboard", controllers.GetPayrollDashboard)
@@ -154,10 +165,7 @@ func SetupRoutes(app *fiber.App) {
 	payrollRoutes.Put("/payroll/:id", controllers.UpdatePayroll)
 	payrollRoutes.Patch("/payroll/:id/status", controllers.UpdatePayrollStatus)
 	
-	// Payroll View (All authenticated users can view)
-	protected.Get("/allowances", controllers.GetAllowances)
-	protected.Get("/deductions", controllers.GetDeductions)
-	protected.Get("/payrolls", controllers.GetPayrolls)
+	// Payroll Detail (All authenticated users) - PARAMETER ROUTE LAST
 	protected.Get("/payroll/:employee_id", controllers.GetPayrollDetail)
 
 	// KPI Management (HR/Admin Only)
@@ -186,12 +194,15 @@ func SetupRoutes(app *fiber.App) {
 	// KPI Dashboard (All authenticated users can view their own)
 	protected.Get("/kpi/dashboard", controllers.GetKPIDashboard)
 
-	// Admin/HR only routes with RBAC
+
+	
+	// Admin only routes
 	adminRoutes := protected.Group("/", middleware.RequireRoles(config.DB, "admin"))
 	adminRoutes.Delete("/employees/:id", controllers.DeleteEmployee)
 	
+	// HR can also link employees to users
 	hrRoutes := protected.Group("/", middleware.RequireRoles(config.DB, "admin", "hr"))
-	hrRoutes.Post("/employees", controllers.CreateEmployee)
+	hrRoutes.Post("/employees/:id/link-user", controllers.LinkEmployeeToUser)
 
 }
 

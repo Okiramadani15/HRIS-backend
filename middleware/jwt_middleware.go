@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"hris-backend/models"
 	"os"
 	"strings"
 
@@ -46,17 +47,8 @@ func JWTMiddlewareWithDB(db *gorm.DB) fiber.Handler {
 			
 			// Load user with role for RBAC if database is provided
 			if db != nil {
-				var user struct {
-					ID     uint   `json:"id"`
-					Name   string `json:"name"`
-					Email  string `json:"email"`
-					RoleID uint   `json:"role_id"`
-					Role   struct {
-						ID   uint   `json:"id"`
-						Name string `json:"name"`
-					} `json:"role"`
-				}
-				if err := db.Table("users").Select("users.*, roles.name as role_name").Joins("LEFT JOIN roles ON users.role_id = roles.id").Where("users.id = ?", userID).Scan(&user).Error; err == nil {
+				var user models.User
+				if err := db.Preload("Role").First(&user, userID).Error; err == nil {
 					c.Locals("user", &user)
 				}
 			}

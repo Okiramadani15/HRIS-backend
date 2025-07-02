@@ -1,0 +1,251 @@
+{
+  "info": {
+    "name": "DEBUG - Authentication Issues",
+    "description": "Debug authentication and role assignment issues"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api"
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "hrToken",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Register Admin",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 201) {",
+              "    console.log('✅ Admin registered');",
+              "} else {",
+              "    console.log('❌ Admin registration failed:', pm.response.text());",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"System Administrator\",\n  \"email\": \"admin@company.com\",\n  \"password\": \"admin123\"\n}"
+        },
+        "url": "{{baseUrl}}/register"
+      }
+    },
+    {
+      "name": "2. Login Admin",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    var jsonData = pm.response.json();",
+              "    pm.collectionVariables.set('adminToken', jsonData.token);",
+              "    console.log('✅ Admin logged in, token saved');",
+              "} else {",
+              "    console.log('❌ Admin login failed:', pm.response.text());",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin@company.com\",\n  \"password\": \"admin123\"\n}"
+        },
+        "url": "{{baseUrl}}/login"
+      }
+    },
+    {
+      "name": "3. Check Available Roles",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    var jsonData = pm.response.json();",
+              "    console.log('✅ Roles available:');",
+              "    if (jsonData.data) {",
+              "        jsonData.data.forEach(role => {",
+              "            console.log(`- ID: ${role.id}, Name: ${role.name}`);",
+              "        });",
+              "    }",
+              "} else {",
+              "    console.log('❌ Cannot get roles:', pm.response.text());",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{adminToken}}"}
+        ],
+        "url": "{{baseUrl}}/roles"
+      }
+    },
+    {
+      "name": "4. Assign Admin Role",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    console.log('✅ Admin role assigned successfully');",
+              "} else {",
+              "    console.log('❌ Admin role assignment failed:', pm.response.text());",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{adminToken}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": 1,\n  \"role_id\": 1\n}"
+        },
+        "url": "{{baseUrl}}/assign-role"
+      }
+    },
+    {
+      "name": "5. Create HR User with Role",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 201) {",
+              "    console.log('✅ HR user created with role');",
+              "} else {",
+              "    console.log('❌ HR user creation failed:', pm.response.text());",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{adminToken}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"HR Manager\",\n  \"email\": \"hr@company.com\",\n  \"password\": \"hr123\",\n  \"role_id\": 2\n}"
+        },
+        "url": "{{baseUrl}}/users/create-with-role"
+      }
+    },
+    {
+      "name": "6. Login HR Manager",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    var jsonData = pm.response.json();",
+              "    pm.collectionVariables.set('hrToken', jsonData.token);",
+              "    console.log('✅ HR Manager logged in successfully');",
+              "} else {",
+              "    console.log('❌ HR login failed:', pm.response.text());",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"hr@company.com\",\n  \"password\": \"hr123\"\n}"
+        },
+        "url": "{{baseUrl}}/login"
+      }
+    },
+    {
+      "name": "7. Test HR Profile Access",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    console.log('✅ HR can access profile');",
+              "} else {",
+              "    console.log('❌ HR profile access failed:', pm.response.text());",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+        ],
+        "url": "{{baseUrl}}/profile"
+      }
+    },
+    {
+      "name": "8. Test Create Employee",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 201) {",
+              "    console.log('✅ HR can create employee - RBAC working!');",
+              "} else {",
+              "    console.log('❌ HR cannot create employee:', pm.response.text());",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"employee_id\": \"EMP001\",\n  \"full_name\": \"Test Employee\",\n  \"phone\": \"081234567890\",\n  \"address\": \"Jakarta\",\n  \"date_of_birth\": \"1990-05-20\",\n  \"gender\": \"Male\",\n  \"department\": \"Sales\",\n  \"position\": \"Staff\",\n  \"hire_date\": \"2024-01-15\",\n  \"salary\": 15000000\n}"
+        },
+        "url": "{{baseUrl}}/employees"
+      }
+    }
+  ]
+}

@@ -5,6 +5,8 @@ import (
 	"hris-backend/config"
 	"hris-backend/models"
 	"hris-backend/utils"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -24,7 +26,7 @@ func generateEmployeeID() string {
 // Create Employee
 func CreateEmployee(c *fiber.Ctx) error {
 	type EmployeeInput struct {
-		UserID      uint    `json:"user_id"`
+		UserID      *uint   `json:"user_id,omitempty"`
 		EmployeeID  string  `json:"employee_id"` // Optional, will auto-generate if empty
 		FullName    string  `json:"full_name"`
 		Phone       string  `json:"phone"`
@@ -76,7 +78,6 @@ func CreateEmployee(c *fiber.Ctx) error {
 	}
 
 	employee := models.Employee{
-		UserID:      input.UserID,
 		EmployeeID:  strings.TrimSpace(input.EmployeeID),
 		FullName:    strings.TrimSpace(input.FullName),
 		Phone:       strings.TrimSpace(input.Phone),
@@ -88,6 +89,11 @@ func CreateEmployee(c *fiber.Ctx) error {
 		HireDate:    hireDate,
 		Salary:      input.Salary,
 		Status:      "active",
+	}
+
+	// Set UserID only if provided
+	if input.UserID != nil && *input.UserID > 0 {
+		employee.UserID = input.UserID
 	}
 
 	result := config.DB.Create(&employee)
@@ -143,6 +149,7 @@ type UpdateInput struct {
 	HireDate    string  `json:"hire_date"`
 	Salary      float64 `json:"salary"`
 	Status      string  `json:"status"`
+	PhotoURL    string  `json:"photo_url"`
 }
 
 // UpdateEmployee updates employee with pointer optimization
@@ -201,6 +208,9 @@ func UpdateEmployee(c *fiber.Ctx) error {
 	if strings.TrimSpace(input.Status) != "" {
 		employee.Status = strings.TrimSpace(input.Status)
 	}
+	if strings.TrimSpace(input.PhotoURL) != "" {
+		employee.PhotoURL = strings.TrimSpace(input.PhotoURL)
+	}
 
 	if err := config.DB.Save(employee).Error; err != nil {
 		return utils.InternalErrorResponse(c, err.Error())
@@ -257,4 +267,149 @@ func GetMyProfile(c *fiber.Ctx) error {
 	}
 
 	return utils.SuccessResponse(c, "Employee profile retrieved successfully", employee)
+}
+
+// UploadEmployeePhoto uploads employee photo
+func UploadEmployeePhoto(c *fiber.Ctx) error {
+	employeeID := c.Params("id")
+	if strings.TrimSpace(employeeID) == "" {
+		return utils.ValidationErrorResponse(c, "Employee ID is required")
+	}
+
+	// Check if employee exists
+	var employee models.Employee
+	if err := config.DB.First(&employee, employeeID).Error; err != nil {
+		return utils.NotFoundResponse(c, "Employee not found")
+	}
+
+	// Get uploaded file
+	file, err := c.FormFile("photo")
+	if err != nil {
+		return utils.ValidationErrorResponse(c, "Photo file is required")
+	}
+
+	// Validate file type
+	if !isValidImageType(file.Header.Get("Content-Type")) {
+		return utils.ValidationErrorResponse(c, "Only JPG, JPEG, PNG files are allowed")
+	}
+
+	// Validate file size (max 5MB)
+	if file.Size > 5*1024*1024 {
+		return utils.ValidationErrorResponse(c, "File size must be less than 5MB")
+	}
+
+	// Create uploads directory
+	uploadsDir := "./uploads/employees"
+	if err := os.MkdirAll(uploadsDir, 0755); err != nil {
+		return utils.InternalErrorResponse(c, "Failed to create upload directory")
+	}
+
+	// Generate unique filename
+	filename := fmt.Sprintf("%s_%d%s", employee.EmployeeID, time.Now().Unix(), filepath.Ext(file.Filename))
+	filePath := filepath.Join(uploadsDir, filename)
+
+	// Save file
+	if err := c.SaveFile(file, filePath); err != nil {
+		return utils.InternalErrorResponse(c, "Failed to save photo")
+	}
+
+	// Update employee photo URL
+	photoURL := fmt.Sprintf("/uploads/employees/%s", filename)
+	employee.PhotoURL = photoURL
+	if err := config.DB.Save(&employee).Error; err != nil {
+		return utils.InternalErrorResponse(c, "Failed to update employee photo")
+	}
+
+	return utils.SuccessResponse(c, "Photo uploaded successfully", fiber.Map{
+		"photo_url": photoURL,
+		"employee": employee,
+	})
+}
+
+// DeleteEmployeePhoto deletes employee photo
+func DeleteEmployeePhoto(c *fiber.Ctx) error {
+	employeeID := c.Params("id")
+	if strings.TrimSpace(employeeID) == "" {
+		return utils.ValidationErrorResponse(c, "Employee ID is required")
+	}
+
+	// Check if employee exists
+	var employee models.Employee
+	if err := config.DB.First(&employee, employeeID).Error; err != nil {
+		return utils.NotFoundResponse(c, "Employee not found")
+	}
+
+	// Delete physical file if exists
+	if employee.PhotoURL != "" {
+		filePath := fmt.Sprintf(".%s", employee.PhotoURL)
+		if err := os.Remove(filePath); err != nil {
+			// Log error but don't fail the request
+			fmt.Printf("Warning: Failed to delete photo file: %v\n", err)
+		}
+	}
+
+	// Update employee record
+	employee.PhotoURL = ""
+	if err := config.DB.Save(&employee).Error; err != nil {
+		return utils.InternalErrorResponse(c, "Failed to update employee record")
+	}
+
+	return utils.SuccessResponse(c, "Photo deleted successfully", employee)
+}
+
+// Helper function to validate image types
+func isValidImageType(contentType string) bool {
+	validTypes := []string{
+		"image/jpeg",
+		"image/jpg",
+		"image/png",
+	}
+	for _, validType := range validTypes {
+		if contentType == validType {
+			return true
+		}
+	}
+	return false
+}
+
+// LinkEmployeeToUser links an employee to a user account
+func LinkEmployeeToUser(c *fiber.Ctx) error {
+	employeeID := c.Params("id")
+	
+	type LinkRequest struct {
+		UserEmail string `json:"user_email"`
+	}
+	
+	var req LinkRequest
+	if err := c.BodyParser(&req); err != nil {
+		return utils.ValidationErrorResponse(c, "Invalid input format")
+	}
+	
+	if req.UserEmail == "" {
+		return utils.ValidationErrorResponse(c, "User email is required")
+	}
+	
+	// Find employee
+	var employee models.Employee
+	if err := config.DB.First(&employee, employeeID).Error; err != nil {
+		return utils.NotFoundResponse(c, "Employee not found")
+	}
+	
+	// Find user by email
+	var user models.User
+	if err := config.DB.Where("email = ?", req.UserEmail).First(&user).Error; err != nil {
+		return utils.NotFoundResponse(c, "User not found")
+	}
+	
+	// Link employee to user
+	employee.UserID = &user.ID
+	if err := config.DB.Save(&employee).Error; err != nil {
+		return utils.InternalErrorResponse(c, "Failed to link employee to user")
+	}
+	
+	return utils.SuccessResponse(c, "Employee linked to user successfully", fiber.Map{
+		"employee_id": employee.EmployeeID,
+		"user_email":  user.Email,
+		"user_name":   user.Name,
+	})
 }

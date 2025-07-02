@@ -39,19 +39,21 @@ func CreateAttendance(c *fiber.Ctx) error {
 }
 
 func (ac *AttendanceController) CreateAttendance(c *fiber.Ctx) error {
-	data := &models.Attendance{} // Use pointer for efficiency
+	request := &models.AttendanceRequest{}
 	
-	if err := c.BodyParser(data); err != nil {
+	if err := c.BodyParser(request); err != nil {
 		return utils.ValidationErrorResponse(c, "Invalid input format")
 	}
 
-	// Validate required fields with panic on critical errors
-	if data == nil {
-		panic("Attendance data pointer is nil")
+	// Validate required fields
+	if strings.TrimSpace(request.EmployeeID) == "" || strings.TrimSpace(request.Date) == "" || strings.TrimSpace(request.Status) == "" {
+		return utils.ValidationErrorResponse(c, "Employee ID, date and status are required")
 	}
 
-	if strings.TrimSpace(data.EmployeeID) == "" || data.Date.IsZero() || strings.TrimSpace(data.Status) == "" {
-		return utils.ValidationErrorResponse(c, "Employee ID, date and status are required")
+	// Convert request to attendance model
+	data, err := request.ToAttendance()
+	if err != nil {
+		return utils.ValidationErrorResponse(c, err.Error())
 	}
 
 	if err := ac.dbService.CreateAttendance(data); err != nil {
@@ -67,9 +69,14 @@ func GetAttendances(c *fiber.Ctx) error {
 }
 
 func (ac *AttendanceController) GetAttendances(c *fiber.Ctx) error {
-	attendances := &[]models.Attendance{} // Use pointer to slice for efficiency
+	attendances := &[]models.Attendance{}
 	
-	if err := ac.dbService.GetAttendances(attendances); err != nil {
+	// Get query parameters
+	date := c.Query("date")
+	employeeID := c.Query("employee_id")
+	month := c.Query("month")
+	
+	if err := ac.dbService.GetAttendancesWithFilters(attendances, date, employeeID, month); err != nil {
 		return utils.InternalErrorResponse(c, err.Error())
 	}
 	
@@ -116,28 +123,25 @@ func (ac *AttendanceController) UpdateAttendance(c *fiber.Ctx) error {
 		return utils.ValidationErrorResponse(c, "Invalid ID format")
 	}
 	
-	attendance := &models.Attendance{} // Use pointer for efficiency
+	attendance := &models.Attendance{}
 	if err := ac.dbService.GetAttendanceByID(uint(id), attendance); err != nil {
 		return utils.NotFoundResponse(c, "Attendance not found")
 	}
 
-	input := &models.Attendance{} // Use pointer for input
+	input := &models.AttendanceUpdateRequest{}
 	if err := c.BodyParser(input); err != nil {
 		return utils.ValidationErrorResponse(c, "Invalid input format")
 	}
 
-	// Update only non-zero values using pointer dereferencing
-	if input.CheckIn != nil {
-		attendance.CheckIn = input.CheckIn
-	}
-	if input.CheckOut != nil {
-		attendance.CheckOut = input.CheckOut
-	}
+	// Update only provided fields
 	if strings.TrimSpace(input.Status) != "" {
 		attendance.Status = input.Status
 	}
-	if strings.TrimSpace(input.Note) != "" {
-		attendance.Note = input.Note
+	if strings.TrimSpace(input.Notes) != "" {
+		attendance.Note = input.Notes
+	}
+	if input.OvertimeHours > 0 {
+		attendance.OvertimeHours = input.OvertimeHours
 	}
 
 	if err := ac.dbService.UpdateAttendance(attendance); err != nil {

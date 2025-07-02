@@ -1,0 +1,212 @@
+{
+  "info": {
+    "name": "05 - Leave Management",
+    "description": "Leave requests, approvals, and leave management"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api"
+    },
+    {
+      "key": "employeeToken",
+      "value": ""
+    },
+    {
+      "key": "hrToken",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Setup Tokens",
+      "item": [
+        {
+          "name": "Login Employee",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('employeeToken', jsonData.token);",
+                  "    console.log('✅ Employee logged in');",
+                  "} else {",
+                  "    console.log('❌ Employee login failed:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"employee@company.com\",\n  \"password\": \"employee123\"\n}"
+            },
+            "url": "{{baseUrl}}/login"
+          }
+        },
+        {
+          "name": "Login HR",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('hrToken', jsonData.token);",
+                  "    console.log('✅ HR logged in');",
+                  "} else {",
+                  "    console.log('❌ HR login failed:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"hr@company.com\",\n  \"password\": \"hr123\"\n}"
+            },
+            "url": "{{baseUrl}}/login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Employee Leave Requests",
+      "item": [
+        {
+          "name": "Submit Annual Leave Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{employeeToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employee_id\": \"EMP001\",\n  \"leave_type_id\": 1,\n  \"start_date\": \"2025-02-10\",\n  \"end_date\": \"2025-02-14\",\n  \"reason\": \"Family vacation to Bali\",\n  \"emergency_contact\": \"081234567890\"\n}"
+            },
+            "url": "{{baseUrl}}/leave-requests"
+          }
+        },
+        {
+          "name": "Submit Sick Leave Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{employeeToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employee_id\": \"EMP002\",\n  \"leave_type_id\": 2,\n  \"start_date\": \"2025-01-20\",\n  \"end_date\": \"2025-01-22\",\n  \"reason\": \"Flu and fever, need medical rest\",\n  \"emergency_contact\": \"081234567891\",\n  \"medical_certificate\": true\n}"
+            },
+            "url": "{{baseUrl}}/leave-requests"
+          }
+        },
+        {
+          "name": "Submit Emergency Leave",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{employeeToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employee_id\": \"EMP003\",\n  \"leave_type_id\": 1,\n  \"start_date\": \"2025-01-25\",\n  \"end_date\": \"2025-01-25\",\n  \"reason\": \"Family emergency - father hospitalized\",\n  \"emergency_contact\": \"081234567892\",\n  \"is_emergency\": true\n}"
+            },
+            "url": "{{baseUrl}}/leave-requests"
+          }
+        }
+      ]
+    },
+    {
+      "name": "HR Leave Management",
+      "item": [
+        {
+          "name": "Get All Leave Requests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "url": "{{baseUrl}}/leave-requests"
+          }
+        },
+        {
+          "name": "Get Pending Leave Requests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/leave-requests?status=pending",
+              "query": [
+                {"key": "status", "value": "pending"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Approve Leave Request",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"approved\",\n  \"approved_by\": \"HR Manager\",\n  \"approval_notes\": \"Leave approved. Enjoy your vacation!\"\n}"
+            },
+            "url": "{{baseUrl}}/leave-requests/1/status"
+          }
+        },
+        {
+          "name": "Reject Leave Request",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"rejected\",\n  \"approved_by\": \"HR Manager\",\n  \"approval_notes\": \"Leave rejected due to project deadline. Please reschedule.\"\n}"
+            },
+            "url": "{{baseUrl}}/leave-requests/2/status"
+          }
+        },
+        {
+          "name": "Get Employee Leave History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/leave-requests?employee_id=EMP001",
+              "query": [
+                {"key": "employee_id", "value": "EMP001"}
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

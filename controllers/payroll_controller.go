@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"hris-backend/config"
 	"hris-backend/models"
+	"hris-backend/utils"
 	"strconv"
 	"time"
 
@@ -15,70 +16,62 @@ import (
 func CreateAllowance(c *fiber.Ctx) error {
 	var allowance models.Allowance
 	if err := c.BodyParser(&allowance); err != nil {
-		return c.Status(400).JSON(fiber.Map{"error": "Invalid JSON format"})
+		return utils.ValidationErrorResponse(c, "Invalid input format")
 	}
 
 	// Validation
 	if allowance.EmployeeID == "" {
-		return c.Status(400).JSON(fiber.Map{"error": "Employee ID is required"})
+		return utils.ValidationErrorResponse(c, "Employee ID is required")
 	}
-	if allowance.Name == "" {
-		return c.Status(400).JSON(fiber.Map{"error": "Allowance name is required"})
+	if allowance.Type == "" {
+		return utils.ValidationErrorResponse(c, "Allowance type is required")
 	}
 	if allowance.Amount <= 0 {
-		return c.Status(400).JSON(fiber.Map{"error": "Amount must be greater than 0"})
+		return utils.ValidationErrorResponse(c, "Amount must be greater than 0")
 	}
 
 	// Check if employee exists
 	var employee models.Employee
 	if err := config.DB.Where("employee_id = ?", allowance.EmployeeID).First(&employee).Error; err != nil {
-		return c.Status(404).JSON(fiber.Map{"error": "Employee not found"})
+		return utils.NotFoundResponse(c, "Employee not found")
 	}
 
 	if err := config.DB.Create(&allowance).Error; err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": "Failed to create allowance"})
+		return utils.InternalErrorResponse(c, "Failed to create allowance")
 	}
 
-	return c.JSON(fiber.Map{
-		"success": true,
-		"message": "Allowance created successfully",
-		"data":    allowance,
-	})
+	return utils.SuccessResponse(c, "Allowance created successfully", allowance)
 }
 
 // CreateDeduction - Buat potongan
 func CreateDeduction(c *fiber.Ctx) error {
 	var deduction models.Deduction
 	if err := c.BodyParser(&deduction); err != nil {
-		return c.Status(400).JSON(fiber.Map{"error": "Invalid JSON format"})
+		return utils.ValidationErrorResponse(c, "Invalid input format")
 	}
 
 	// Validation
 	if deduction.EmployeeID == "" {
-		return c.Status(400).JSON(fiber.Map{"error": "Employee ID is required"})
+		return utils.ValidationErrorResponse(c, "Employee ID is required")
 	}
-	if deduction.Name == "" {
-		return c.Status(400).JSON(fiber.Map{"error": "Deduction name is required"})
+	if deduction.Type == "" {
+		return utils.ValidationErrorResponse(c, "Deduction type is required")
 	}
 	if deduction.Amount <= 0 {
-		return c.Status(400).JSON(fiber.Map{"error": "Amount must be greater than 0"})
+		return utils.ValidationErrorResponse(c, "Amount must be greater than 0")
 	}
 
 	// Check if employee exists
 	var employee models.Employee
 	if err := config.DB.Where("employee_id = ?", deduction.EmployeeID).First(&employee).Error; err != nil {
-		return c.Status(404).JSON(fiber.Map{"error": "Employee not found"})
+		return utils.NotFoundResponse(c, "Employee not found")
 	}
 
 	if err := config.DB.Create(&deduction).Error; err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": "Failed to create deduction"})
+		return utils.InternalErrorResponse(c, "Failed to create deduction")
 	}
 
-	return c.JSON(fiber.Map{
-		"success": true,
-		"message": "Deduction created successfully",
-		"data":    deduction,
-	})
+	return utils.SuccessResponse(c, "Deduction created successfully", deduction)
 }
 
 // GeneratePayroll - Generate payroll untuk semua karyawan
@@ -393,44 +386,67 @@ func DeleteDeduction(c *fiber.Ctx) error {
 	})
 }
 
-// GetAllowances - Get all allowances
+// GetAllowances - Get allowances
 func GetAllowances(c *fiber.Ctx) error {
+	user := c.Locals("user").(*models.User)
 	employeeID := c.Query("employee_id")
 	
 	query := config.DB.Model(&models.Allowance{})
-	if employeeID != "" {
-		query = query.Where("employee_id = ?", employeeID)
+	
+	// Check if user has role loaded
+	if user.Role.Name == "admin" || user.Role.Name == "hr" {
+		// HR/Admin can see all or filter by employee_id
+		if employeeID != "" {
+			query = query.Where("employee_id = ?", employeeID)
+		}
+	} else {
+		// For regular employees or users without specific roles
+		var employee models.Employee
+		err := config.DB.Where("user_id = ?", user.ID).First(&employee).Error
+		if err != nil {
+			// Return empty result if employee record not found
+			return utils.SuccessResponse(c, "No allowances found", []models.Allowance{})
+		}
+		query = query.Where("employee_id = ?", employee.EmployeeID)
 	}
 	
 	var allowances []models.Allowance
 	if err := query.Find(&allowances).Error; err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": "Failed to fetch allowances"})
+		return utils.InternalErrorResponse(c, "Failed to fetch allowances")
 	}
 	
-	return c.JSON(fiber.Map{
-		"success": true,
-		"data":    allowances,
-	})
+	return utils.SuccessResponse(c, "Allowances retrieved successfully", allowances)
 }
 
-// GetDeductions - Get all deductions
+// GetDeductions - Get deductions
 func GetDeductions(c *fiber.Ctx) error {
+	user := c.Locals("user").(*models.User)
 	employeeID := c.Query("employee_id")
 	
 	query := config.DB.Model(&models.Deduction{})
-	if employeeID != "" {
-		query = query.Where("employee_id = ?", employeeID)
+	
+	// If user is HR/Admin, they can see all or filter by employee_id
+	if user.Role.Name == "admin" || user.Role.Name == "hr" {
+		if employeeID != "" {
+			query = query.Where("employee_id = ?", employeeID)
+		}
+	} else {
+		// For regular employees, find their employee record
+		var employee models.Employee
+		err := config.DB.Where("user_id = ?", user.ID).First(&employee).Error
+		if err != nil {
+			// Return empty result if employee record not found
+			return utils.SuccessResponse(c, "No deductions found", []models.Deduction{})
+		}
+		query = query.Where("employee_id = ?", employee.EmployeeID)
 	}
 	
 	var deductions []models.Deduction
 	if err := query.Find(&deductions).Error; err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": "Failed to fetch deductions"})
+		return utils.InternalErrorResponse(c, "Failed to fetch deductions")
 	}
 	
-	return c.JSON(fiber.Map{
-		"success": true,
-		"data":    deductions,
-	})
+	return utils.SuccessResponse(c, "Deductions retrieved successfully", deductions)
 }
 
 // GetPayrollSummary - Get payroll summary statistics

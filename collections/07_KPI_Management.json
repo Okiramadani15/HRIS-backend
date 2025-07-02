@@ -1,0 +1,458 @@
+{
+  "info": {
+    "name": "07 - KPI Management",
+    "description": "KPI categories, metrics, targets, and performance tracking"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api"
+    },
+    {
+      "key": "hrToken",
+      "value": ""
+    },
+    {
+      "key": "managerToken",
+      "value": ""
+    },
+    {
+      "key": "employeeToken",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Setup Tokens",
+      "item": [
+        {
+          "name": "Login HR",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('hrToken', jsonData.token);",
+                  "    console.log('✅ HR logged in');",
+                  "} else {",
+                  "    console.log('❌ HR login failed:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"hr@company.com\",\n  \"password\": \"hr123\"\n}"
+            },
+            "url": "{{baseUrl}}/login"
+          }
+        },
+        {
+          "name": "Login Manager",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('managerToken', jsonData.token);",
+                  "    console.log('✅ Manager logged in');",
+                  "} else {",
+                  "    console.log('❌ Manager login failed:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"manager@company.com\",\n  \"password\": \"manager123\"\n}"
+            },
+            "url": "{{baseUrl}}/login"
+          }
+        },
+        {
+          "name": "Login Employee",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('employeeToken', jsonData.token);",
+                  "    console.log('✅ Employee logged in');",
+                  "} else {",
+                  "    console.log('❌ Employee login failed:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"employee@company.com\",\n  \"password\": \"employee123\"\n}"
+            },
+            "url": "{{baseUrl}}/login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "KPI Categories (HR Only)",
+      "item": [
+        {
+          "name": "Create Sales Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sales Performance\",\n  \"description\": \"Sales and revenue related KPIs\",\n  \"is_active\": true\n}"
+            },
+            "url": "{{baseUrl}}/kpi/categories"
+          }
+        },
+        {
+          "name": "Create Customer Service Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Customer Service\",\n  \"description\": \"Customer satisfaction and service quality KPIs\",\n  \"is_active\": true\n}"
+            },
+            "url": "{{baseUrl}}/kpi/categories"
+          }
+        },
+        {
+          "name": "Create Operational Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Operational Excellence\",\n  \"description\": \"Process efficiency and operational KPIs\",\n  \"is_active\": true\n}"
+            },
+            "url": "{{baseUrl}}/kpi/categories"
+          }
+        }
+      ]
+    },
+    {
+      "name": "KPI Metrics (HR Only)",
+      "item": [
+        {
+          "name": "Create Sales Target Metric",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category_id\": 1,\n  \"name\": \"Monthly Sales Target\",\n  \"description\": \"Monthly sales achievement in rupiah\",\n  \"unit\": \"IDR\",\n  \"target_type\": \"higher_better\",\n  \"weight\": 3.0,\n  \"is_active\": true\n}"
+            },
+            "url": "{{baseUrl}}/kpi/metrics"
+          }
+        },
+        {
+          "name": "Create Customer Satisfaction Metric",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category_id\": 2,\n  \"name\": \"Customer Satisfaction Score\",\n  \"description\": \"Customer satisfaction rating percentage\",\n  \"unit\": \"%\",\n  \"target_type\": \"higher_better\",\n  \"weight\": 2.5,\n  \"is_active\": true\n}"
+            },
+            "url": "{{baseUrl}}/kpi/metrics"
+          }
+        },
+        {
+          "name": "Create Response Time Metric",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category_id\": 2,\n  \"name\": \"Average Response Time\",\n  \"description\": \"Average customer inquiry response time in hours\",\n  \"unit\": \"hours\",\n  \"target_type\": \"lower_better\",\n  \"weight\": 2.0,\n  \"is_active\": true\n}"
+            },
+            "url": "{{baseUrl}}/kpi/metrics"
+          }
+        },
+        {
+          "name": "Create Task Completion Metric",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category_id\": 3,\n  \"name\": \"Task Completion Rate\",\n  \"description\": \"Percentage of tasks completed on time\",\n  \"unit\": \"%\",\n  \"target_type\": \"higher_better\",\n  \"weight\": 1.5,\n  \"is_active\": true\n}"
+            },
+            "url": "{{baseUrl}}/kpi/metrics"
+          }
+        }
+      ]
+    },
+    {
+      "name": "KPI Targets (HR Only)",
+      "item": [
+        {
+          "name": "Set Individual Target",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employee_id\": \"EMP001\",\n  \"metric_id\": 1,\n  \"period\": \"2025-01\",\n  \"period_type\": \"monthly\",\n  \"target_value\": 75000000,\n  \"min_value\": 60000000,\n  \"max_value\": 90000000\n}"
+            },
+            "url": "{{baseUrl}}/kpi/targets"
+          }
+        },
+        {
+          "name": "Set Bulk Targets - Sales Team",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targets\": [\n    {\n      \"employee_id\": \"EMP001\",\n      \"metric_id\": 1,\n      \"period\": \"2025-01\",\n      \"period_type\": \"monthly\",\n      \"target_value\": 75000000,\n      \"min_value\": 60000000,\n      \"max_value\": 90000000\n    },\n    {\n      \"employee_id\": \"EMP001\",\n      \"metric_id\": 2,\n      \"period\": \"2025-01\",\n      \"period_type\": \"monthly\",\n      \"target_value\": 90.0,\n      \"min_value\": 85.0,\n      \"max_value\": 100.0\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/kpi/targets/bulk"
+          }
+        },
+        {
+          "name": "Set Bulk Targets - CS Team",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targets\": [\n    {\n      \"employee_id\": \"EMP002\",\n      \"metric_id\": 2,\n      \"period\": \"2025-01\",\n      \"period_type\": \"monthly\",\n      \"target_value\": 95.0,\n      \"min_value\": 90.0,\n      \"max_value\": 100.0\n    },\n    {\n      \"employee_id\": \"EMP002\",\n      \"metric_id\": 3,\n      \"period\": \"2025-01\",\n      \"period_type\": \"monthly\",\n      \"target_value\": 2.0,\n      \"min_value\": 1.0,\n      \"max_value\": 3.0\n    },\n    {\n      \"employee_id\": \"EMP002\",\n      \"metric_id\": 4,\n      \"period\": \"2025-01\",\n      \"period_type\": \"monthly\",\n      \"target_value\": 98.0,\n      \"min_value\": 95.0,\n      \"max_value\": 100.0\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/kpi/targets/bulk"
+          }
+        }
+      ]
+    },
+    {
+      "name": "KPI Actuals (HR Only)",
+      "item": [
+        {
+          "name": "Record Sales Achievement",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employee_id\": \"EMP001\",\n  \"metric_id\": 1,\n  \"period\": \"2025-01\",\n  \"period_type\": \"monthly\",\n  \"actual_value\": 82000000,\n  \"notes\": \"Exceeded monthly sales target, secured 3 major clients including PT ABC Corp\"\n}"
+            },
+            "url": "{{baseUrl}}/kpi/actuals"
+          }
+        },
+        {
+          "name": "Record Customer Satisfaction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employee_id\": \"EMP001\",\n  \"metric_id\": 2,\n  \"period\": \"2025-01\",\n  \"period_type\": \"monthly\",\n  \"actual_value\": 88.5,\n  \"notes\": \"Good customer feedback overall, some improvement needed in follow-up process\"\n}"
+            },
+            "url": "{{baseUrl}}/kpi/actuals"
+          }
+        },
+        {
+          "name": "Record CS Response Time",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employee_id\": \"EMP002\",\n  \"metric_id\": 3,\n  \"period\": \"2025-01\",\n  \"period_type\": \"monthly\",\n  \"actual_value\": 1.5,\n  \"notes\": \"Excellent response time achieved through new ticketing system implementation\"\n}"
+            },
+            "url": "{{baseUrl}}/kpi/actuals"
+          }
+        },
+        {
+          "name": "Record Task Completion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employee_id\": \"EMP002\",\n  \"metric_id\": 4,\n  \"period\": \"2025-01\",\n  \"period_type\": \"monthly\",\n  \"actual_value\": 96.8,\n  \"notes\": \"High task completion rate, only 2 tasks delayed due to external vendor issues\"\n}"
+            },
+            "url": "{{baseUrl}}/kpi/actuals"
+          }
+        }
+      ]
+    },
+    {
+      "name": "KPI Views (Manager & Above)",
+      "item": [
+        {
+          "name": "Manager - View Categories",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{managerToken}}"}
+            ],
+            "url": "{{baseUrl}}/kpi/categories"
+          }
+        },
+        {
+          "name": "Manager - View Metrics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{managerToken}}"}
+            ],
+            "url": "{{baseUrl}}/kpi/metrics"
+          }
+        },
+        {
+          "name": "Manager - View Targets",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{managerToken}}"}
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/kpi/targets?period=2025-01",
+              "query": [
+                {"key": "period", "value": "2025-01"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Manager - View Actuals",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{managerToken}}"}
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/kpi/actuals?period=2025-01",
+              "query": [
+                {"key": "period", "value": "2025-01"}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "KPI Reports & Dashboard",
+      "item": [
+        {
+          "name": "HR - Get KPI Report",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/kpi/report?period=2025-01",
+              "query": [
+                {"key": "period", "value": "2025-01"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Employee - View Own Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{employeeToken}}"}
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/kpi/dashboard?employee_id=EMP001&period=2025-01",
+              "query": [
+                {"key": "employee_id", "value": "EMP001"},
+                {"key": "period", "value": "2025-01"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Manager - View Team Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{managerToken}}"}
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/kpi/dashboard?employee_id=EMP002&period=2025-01",
+              "query": [
+                {"key": "employee_id", "value": "EMP002"},
+                {"key": "period", "value": "2025-01"}
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

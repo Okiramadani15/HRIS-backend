@@ -1,0 +1,224 @@
+{
+  "info": {
+    "name": "03 - Employee Management with Photo Upload",
+    "description": "Employee CRUD operations, profile management, and photo upload"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api"
+    },
+    {
+      "key": "hrToken",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "0. Login HR Manager",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    var jsonData = pm.response.json();",
+              "    pm.collectionVariables.set('hrToken', jsonData.token);",
+              "    console.log('✅ HR Manager logged in');",
+              "} else {",
+              "    console.log('❌ HR login failed:', pm.response.text());",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"hr@company.com\",\n  \"password\": \"hr123\"\n}"
+        },
+        "url": "{{baseUrl}}/login"
+      }
+    },
+    {
+      "name": "1. Create Sales Employee",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"employee_id\": \"EMP001\",\n  \"full_name\": \"John Sales Executive\",\n  \"phone\": \"081234567890\",\n  \"address\": \"Jakarta\",\n  \"date_of_birth\": \"1990-05-20\",\n  \"gender\": \"Male\",\n  \"department\": \"Sales\",\n  \"position\": \"Senior Staff\",\n  \"hire_date\": \"2024-01-15\",\n  \"salary\": 15000000\n}"
+        },
+        "url": "{{baseUrl}}/employees"
+      }
+    },
+    {
+      "name": "2. Upload Employee Photo",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "photo",
+              "type": "file",
+              "src": "",
+              "description": "Select employee photo (JPG, JPEG, PNG, max 5MB)"
+            }
+          ]
+        },
+        "url": "{{baseUrl}}/employees/1/photo"
+      }
+    },
+    {
+      "name": "3. Create HR Employee",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"employee_id\": \"EMP002\",\n  \"full_name\": \"Jane HR Specialist\",\n  \"phone\": \"081234567891\",\n  \"address\": \"Jakarta\",\n  \"date_of_birth\": \"1992-08-15\",\n  \"gender\": \"Female\",\n  \"department\": \"Human Resources\",\n  \"position\": \"Staff\",\n  \"hire_date\": \"2024-02-01\",\n  \"salary\": 12000000\n}"
+        },
+        "url": "{{baseUrl}}/employees"
+      }
+    },
+    {
+      "name": "4. Create IT Employee",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"employee_id\": \"EMP003\",\n  \"full_name\": \"Bob Developer\",\n  \"phone\": \"081234567892\",\n  \"address\": \"Jakarta\",\n  \"date_of_birth\": \"1988-12-10\",\n  \"gender\": \"Male\",\n  \"department\": \"Information Technology\",\n  \"position\": \"Senior Staff\",\n  \"hire_date\": \"2024-03-01\",\n  \"salary\": 18000000\n}"
+        },
+        "url": "{{baseUrl}}/employees"
+      }
+    },
+    {
+      "name": "5. Get All Employees",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    var jsonData = pm.response.json();",
+              "    console.log('✅ Employees retrieved:', jsonData.total || 0);",
+              "} else {",
+              "    console.log('❌ Failed to get employees');",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+        ],
+        "url": "{{baseUrl}}/employees"
+      }
+    },
+    {
+      "name": "6. Get Employee by ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+        ],
+        "url": "{{baseUrl}}/employees/1"
+      }
+    },
+    {
+      "name": "7. Update Employee",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"full_name\": \"John Sales Manager\",\n  \"position\": \"Manager\",\n  \"salary\": 20000000\n}"
+        },
+        "url": "{{baseUrl}}/employees/1"
+      }
+    },
+    {
+      "name": "8. Upload Another Employee Photo",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "photo",
+              "type": "file",
+              "src": "",
+              "description": "Select employee photo for EMP002"
+            }
+          ]
+        },
+        "url": "{{baseUrl}}/employees/2/photo"
+      }
+    },
+    {
+      "name": "9. Delete Employee Photo",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+        ],
+        "url": "{{baseUrl}}/employees/1/photo"
+      }
+    },
+    {
+      "name": "10. Get Updated Employee with Photo",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    var jsonData = pm.response.json();",
+              "    if (jsonData.employee && jsonData.employee.photo_url) {",
+              "        console.log('✅ Employee has photo:', jsonData.employee.photo_url);",
+              "    } else {",
+              "        console.log('ℹ️ Employee has no photo');",
+              "    }",
+              "} else {",
+              "    console.log('❌ Failed to get employee');",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+        ],
+        "url": "{{baseUrl}}/employees/2"
+      }
+    }
+  ]
+}

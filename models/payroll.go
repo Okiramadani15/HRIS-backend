@@ -20,14 +20,20 @@ type Payroll struct {
 
 type Allowance struct {
 	gorm.Model
-	EmployeeID string  `json:"employee_id" gorm:"type:varchar(50)"`
-	Name       string  `json:"name"`
-	Amount     float64 `json:"amount"`
+	EmployeeID  string  `json:"employee_id" gorm:"type:varchar(50)"`
+	Type        string  `json:"type"`
+	Amount      float64 `json:"amount"`
+	Description string  `json:"description"`
+	Period      string  `json:"period"`
+	IsTaxable   bool    `json:"is_taxable"`
 }
 
 type Deduction struct {
 	gorm.Model
-	EmployeeID string  `json:"employee_id" gorm:"type:varchar(50)"`
-	Name       string  `json:"name"`
-	Amount     float64 `json:"amount"`
+	EmployeeID  string  `json:"employee_id" gorm:"type:varchar(50)"`
+	Type        string  `json:"type"`
+	Amount      float64 `json:"amount"`
+	Description string  `json:"description"`
+	Period      string  `json:"period"`
+	IsMandatory bool    `json:"is_mandatory"`
 }

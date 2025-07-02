@@ -1,0 +1,198 @@
+{
+  "info": {
+    "name": "04 - Attendance Management",
+    "description": "Employee attendance tracking and management"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api"
+    },
+    {
+      "key": "employeeToken",
+      "value": ""
+    },
+    {
+      "key": "hrToken",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Setup Tokens",
+      "item": [
+        {
+          "name": "Login Employee",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('employeeToken', jsonData.token);",
+                  "    console.log('✅ Employee logged in');",
+                  "} else {",
+                  "    console.log('❌ Employee login failed:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"employee@company.com\",\n  \"password\": \"employee123\"\n}"
+            },
+            "url": "{{baseUrl}}/login"
+          }
+        },
+        {
+          "name": "Login HR",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('hrToken', jsonData.token);",
+                  "    console.log('✅ HR logged in');",
+                  "} else {",
+                  "    console.log('❌ HR login failed:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"hr@company.com\",\n  \"password\": \"hr123\"\n}"
+            },
+            "url": "{{baseUrl}}/login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Employee Self-Service",
+      "item": [
+        {
+          "name": "Clock In - Morning",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{employeeToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employee_id\": \"EMP001\",\n  \"date\": \"2025-01-15\",\n  \"clock_in\": \"09:00:00\",\n  \"location\": \"Jakarta Office\",\n  \"status\": \"present\",\n  \"notes\": \"On time arrival\"\n}"
+            },
+            "url": "{{baseUrl}}/attendances"
+          }
+        },
+        {
+          "name": "Clock Out - Evening",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{employeeToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employee_id\": \"EMP001\",\n  \"date\": \"2025-01-15\",\n  \"clock_out\": \"17:30:00\",\n  \"location\": \"Jakarta Office\",\n  \"status\": \"present\",\n  \"notes\": \"Completed daily tasks\"\n}"
+            },
+            "url": "{{baseUrl}}/attendances"
+          }
+        },
+        {
+          "name": "Full Day Attendance",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{employeeToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employee_id\": \"EMP002\",\n  \"date\": \"2025-01-16\",\n  \"clock_in\": \"08:45:00\",\n  \"clock_out\": \"17:15:00\",\n  \"break_start\": \"12:00:00\",\n  \"break_end\": \"13:00:00\",\n  \"location\": \"Jakarta Office\",\n  \"status\": \"present\",\n  \"notes\": \"Regular working day\"\n}"
+            },
+            "url": "{{baseUrl}}/attendances"
+          }
+        }
+      ]
+    },
+    {
+      "name": "HR Management",
+      "item": [
+        {
+          "name": "Get All Attendances",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/attendances?date=2025-01-15",
+              "query": [
+                {"key": "date", "value": "2025-01-15"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Attendance by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "url": "{{baseUrl}}/attendances/1"
+          }
+        },
+        {
+          "name": "Update Attendance",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"present\",\n  \"notes\": \"Approved by HR\",\n  \"overtime_hours\": 0.5\n}"
+            },
+            "url": "{{baseUrl}}/attendances/1"
+          }
+        },
+        {
+          "name": "Get Employee Attendance Report",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/attendances?employee_id=EMP001&month=2025-01",
+              "query": [
+                {"key": "employee_id", "value": "EMP001"},
+                {"key": "month", "value": "2025-01"}
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

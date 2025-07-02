@@ -9,18 +9,27 @@ import (
 )
 
 func CreateLeaveRequest(c *fiber.Ctx) error {
-	var input models.LeaveRequest
-	if err := c.BodyParser(&input); err != nil {
+	request := &models.LeaveRequestRequest{}
+	if err := c.BodyParser(request); err != nil {
 		return utils.ValidationErrorResponse(c, "Invalid input format")
 	}
-	if input.EmployeeID == "" || input.LeaveTypeID == 0 || input.StartDate.IsZero() || input.EndDate.IsZero() {
+	
+	// Validate required fields
+	if request.EmployeeID == "" || request.LeaveTypeID == 0 || request.StartDate == "" || request.EndDate == "" {
 		return utils.ValidationErrorResponse(c, "Employee ID, Leave Type ID, Start Date, and End Date are required")
 	}
-	input.Status = "pending"
-	if err := config.DB.Create(&input).Error; err != nil {
+	
+	// Convert request to leave request model
+	leaveRequest, err := request.ToLeaveRequest()
+	if err != nil {
+		return utils.ValidationErrorResponse(c, err.Error())
+	}
+	
+	if err := config.DB.Create(leaveRequest).Error; err != nil {
 		return utils.InternalErrorResponse(c, err.Error())
 	}
-	return utils.SuccessResponse(c, "Leave request created successfully", input)
+	
+	return utils.SuccessResponse(c, "Leave request created successfully", leaveRequest)
 }
 
 func GetLeaveRequests(c *fiber.Ctx) error {

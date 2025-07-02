@@ -1,0 +1,322 @@
+{
+  "info": {
+    "name": "06 - Payroll Management",
+    "description": "Payroll processing, allowances, and deductions"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api"
+    },
+    {
+      "key": "hrToken",
+      "value": ""
+    },
+    {
+      "key": "employeeToken",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Setup Tokens",
+      "item": [
+        {
+          "name": "Login HR",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('hrToken', jsonData.token);",
+                  "    console.log('✅ HR logged in');",
+                  "} else {",
+                  "    console.log('❌ HR login failed:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"hr@company.com\",\n  \"password\": \"hr123\"\n}"
+            },
+            "url": "{{baseUrl}}/login"
+          }
+        },
+        {
+          "name": "Login Employee",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('employeeToken', jsonData.token);",
+                  "    console.log('✅ Employee logged in');",
+                  "} else {",
+                  "    console.log('❌ Employee login failed:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"employee@company.com\",\n  \"password\": \"employee123\"\n}"
+            },
+            "url": "{{baseUrl}}/login"
+          }
+        },
+        {
+          "name": "Check Employee Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{employeeToken}}"}
+            ],
+            "url": "{{baseUrl}}/profile"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Allowances Management",
+      "item": [
+        {
+          "name": "Create Transport Allowance",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employee_id\": \"EMP001\",\n  \"type\": \"transport\",\n  \"amount\": 500000,\n  \"description\": \"Monthly transport allowance\",\n  \"period\": \"2025-01\",\n  \"is_taxable\": false\n}"
+            },
+            "url": "{{baseUrl}}/allowances"
+          }
+        },
+        {
+          "name": "Create Performance Bonus",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employee_id\": \"EMP001\",\n  \"type\": \"bonus\",\n  \"amount\": 2000000,\n  \"description\": \"Q4 2024 performance bonus\",\n  \"period\": \"2025-01\",\n  \"is_taxable\": true\n}"
+            },
+            "url": "{{baseUrl}}/allowances"
+          }
+        },
+        {
+          "name": "Create Bulk Allowances",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"allowances\": [\n    {\n      \"employee_id\": \"EMP002\",\n      \"type\": \"transport\",\n      \"amount\": 500000,\n      \"description\": \"Monthly transport allowance\",\n      \"period\": \"2025-01\"\n    },\n    {\n      \"employee_id\": \"EMP003\",\n      \"type\": \"transport\",\n      \"amount\": 500000,\n      \"description\": \"Monthly transport allowance\",\n      \"period\": \"2025-01\"\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/allowances/bulk"
+          }
+        },
+        {
+          "name": "Link Employee to User (Admin Only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_email\": \"employee@company.com\"\n}"
+            },
+            "url": "{{baseUrl}}/employees/1/link-user"
+          }
+        },
+        {
+          "name": "Get All Allowances",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{employeeToken}}"}
+            ],
+            "url": "{{baseUrl}}/allowances"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Deductions Management",
+      "item": [
+        {
+          "name": "Create BPJS Deduction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employee_id\": \"EMP001\",\n  \"type\": \"bpjs\",\n  \"amount\": 150000,\n  \"description\": \"BPJS Kesehatan monthly contribution\",\n  \"period\": \"2025-01\",\n  \"is_mandatory\": true\n}"
+            },
+            "url": "{{baseUrl}}/deductions"
+          }
+        },
+        {
+          "name": "Create Tax Deduction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employee_id\": \"EMP001\",\n  \"type\": \"tax\",\n  \"amount\": 750000,\n  \"description\": \"PPh 21 income tax\",\n  \"period\": \"2025-01\",\n  \"is_mandatory\": true\n}"
+            },
+            "url": "{{baseUrl}}/deductions"
+          }
+        },
+        {
+          "name": "Create Bulk Deductions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deductions\": [\n    {\n      \"employee_id\": \"EMP002\",\n      \"type\": \"bpjs\",\n      \"amount\": 120000,\n      \"description\": \"BPJS Kesehatan\",\n      \"period\": \"2025-01\"\n    },\n    {\n      \"employee_id\": \"EMP003\",\n      \"type\": \"bpjs\",\n      \"amount\": 180000,\n      \"description\": \"BPJS Kesehatan\",\n      \"period\": \"2025-01\"\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/deductions/bulk"
+          }
+        },
+        {
+          "name": "Get All Deductions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{employeeToken}}"}
+            ],
+            "url": "{{baseUrl}}/deductions"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payroll Processing",
+      "item": [
+        {
+          "name": "Generate Monthly Payroll",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"period\": \"2025-01\",\n  \"employee_ids\": [\"EMP001\", \"EMP002\", \"EMP003\"],\n  \"include_allowances\": true,\n  \"include_deductions\": true,\n  \"include_overtime\": true\n}"
+            },
+            "url": "{{baseUrl}}/payroll/generate"
+          }
+        },
+        {
+          "name": "Get Payroll Summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/payroll/summary?period=2025-01",
+              "query": [
+                {"key": "period", "value": "2025-01"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Payroll Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/payroll/dashboard?period=2025-01",
+              "query": [
+                {"key": "period", "value": "2025-01"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Payrolls",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{employeeToken}}"}
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/payrolls?period=2025-01",
+              "query": [
+                {"key": "period", "value": "2025-01"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Employee Payroll Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{employeeToken}}"}
+            ],
+            "url": "{{baseUrl}}/payroll/EMP001"
+          }
+        },
+        {
+          "name": "Update Payroll Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"paid\",\n  \"payment_date\": \"2025-01-31\",\n  \"payment_method\": \"bank_transfer\",\n  \"notes\": \"Salary transferred successfully\"\n}"
+            },
+            "url": "{{baseUrl}}/payroll/1/status"
+          }
+        }
+      ]
+    }
+  ]
+}

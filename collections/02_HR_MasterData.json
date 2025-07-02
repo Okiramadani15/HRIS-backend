@@ -1,0 +1,303 @@
+{
+  "info": {
+    "name": "02 - HR Master Data Management",
+    "description": "Departments, positions, locations, work shifts, and other master data"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api"
+    },
+    {
+      "key": "hrToken",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "0. Login HR Manager",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    var jsonData = pm.response.json();",
+              "    pm.collectionVariables.set('hrToken', jsonData.token);",
+              "    console.log('✅ HR Manager logged in');",
+              "} else {",
+              "    console.log('❌ HR login failed:', pm.response.text());",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"hr@company.com\",\n  \"password\": \"hr123\"\n}"
+        },
+        "url": "{{baseUrl}}/login"
+      }
+    },
+    {
+      "name": "Departments",
+      "item": [
+        {
+          "name": "Create Sales Department",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sales\",\n  \"description\": \"Sales and Marketing Department\",\n  \"manager_name\": \"Sales Manager\"\n}"
+            },
+            "url": "{{baseUrl}}/departments"
+          }
+        },
+        {
+          "name": "Create HR Department",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Human Resources\",\n  \"description\": \"HR Department\",\n  \"manager_name\": \"HR Manager\"\n}"
+            },
+            "url": "{{baseUrl}}/departments"
+          }
+        },
+        {
+          "name": "Create IT Department",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Information Technology\",\n  \"description\": \"IT Department\",\n  \"manager_name\": \"IT Manager\"\n}"
+            },
+            "url": "{{baseUrl}}/departments"
+          }
+        },
+        {
+          "name": "Get All Departments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "url": "{{baseUrl}}/departments"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Positions",
+      "item": [
+        {
+          "name": "Create Manager Position",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Manager\",\n  \"description\": \"Department Manager\",\n  \"level\": \"Manager\"\n}"
+            },
+            "url": "{{baseUrl}}/positions"
+          }
+        },
+        {
+          "name": "Create Senior Staff Position",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Senior Staff\",\n  \"description\": \"Senior Level Staff\",\n  \"level\": \"Senior\"\n}"
+            },
+            "url": "{{baseUrl}}/positions"
+          }
+        },
+        {
+          "name": "Create Staff Position",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Staff\",\n  \"description\": \"Regular Staff\",\n  \"level\": \"Staff\"\n}"
+            },
+            "url": "{{baseUrl}}/positions"
+          }
+        },
+        {
+          "name": "Get All Positions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "url": "{{baseUrl}}/positions"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Locations",
+      "item": [
+        {
+          "name": "Create Jakarta Office",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jakarta Office\",\n  \"address\": \"Jl. Sudirman No. 123, Jakarta\",\n  \"city\": \"Jakarta\",\n  \"country\": \"Indonesia\"\n}"
+            },
+            "url": "{{baseUrl}}/locations"
+          }
+        },
+        {
+          "name": "Create Surabaya Branch",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Surabaya Branch\",\n  \"address\": \"Jl. Pemuda No. 456, Surabaya\",\n  \"city\": \"Surabaya\",\n  \"country\": \"Indonesia\"\n}"
+            },
+            "url": "{{baseUrl}}/locations"
+          }
+        },
+        {
+          "name": "Get All Locations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "url": "{{baseUrl}}/locations"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Work Shifts",
+      "item": [
+        {
+          "name": "Create Regular Shift",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Regular Shift\",\n  \"start_time\": \"09:00\",\n  \"end_time\": \"17:00\",\n  \"break_duration\": 60\n}"
+            },
+            "url": "{{baseUrl}}/work-shifts"
+          }
+        },
+        {
+          "name": "Create Flexible Shift",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Flexible Shift\",\n  \"start_time\": \"08:00\",\n  \"end_time\": \"16:00\",\n  \"break_duration\": 60\n}"
+            },
+            "url": "{{baseUrl}}/work-shifts"
+          }
+        },
+        {
+          "name": "Get All Work Shifts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "url": "{{baseUrl}}/work-shifts"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Leave Types",
+      "item": [
+        {
+          "name": "Create Annual Leave",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Annual Leave\",\n  \"description\": \"Yearly vacation leave\",\n  \"max_days\": 12,\n  \"is_paid\": true\n}"
+            },
+            "url": "{{baseUrl}}/leave-types"
+          }
+        },
+        {
+          "name": "Create Sick Leave",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sick Leave\",\n  \"description\": \"Medical leave\",\n  \"max_days\": 30,\n  \"is_paid\": true\n}"
+            },
+            "url": "{{baseUrl}}/leave-types"
+          }
+        },
+        {
+          "name": "Get All Leave Types",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+            ],
+            "url": "{{baseUrl}}/leave-types"
+          }
+        }
+      ]
+    }
+  ]
+}

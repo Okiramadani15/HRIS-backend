@@ -1,0 +1,160 @@
+{
+  "info": {
+    "name": "01 - Authentication & User Management",
+    "description": "User registration, login, role assignment, and user management"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api"
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Register Admin User",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 201) {",
+              "    console.log('✅ Admin user registered successfully');",
+              "} else {",
+              "    console.log('❌ Admin registration failed:', pm.response.text());",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"System Administrator\",\n  \"email\": \"admin@company.com\",\n  \"password\": \"admin123\"\n}"
+        },
+        "url": "{{baseUrl}}/register"
+      }
+    },
+    {
+      "name": "2. Login Admin",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    var jsonData = pm.response.json();",
+              "    pm.collectionVariables.set('adminToken', jsonData.token);",
+              "    console.log('✅ Admin logged in successfully');",
+              "} else {",
+              "    console.log('❌ Admin login failed:', pm.response.text());",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin@company.com\",\n  \"password\": \"admin123\"\n}"
+        },
+        "url": "{{baseUrl}}/login"
+      }
+    },
+    {
+      "name": "3. Assign Admin Role",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    console.log('✅ Admin role assigned');",
+              "} else {",
+              "    console.log('❌ Role assignment failed:', pm.response.text());",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{adminToken}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": 1,\n  \"role_id\": 1\n}"
+        },
+        "url": "{{baseUrl}}/assign-role"
+      }
+    },
+    {
+      "name": "4. Get All Roles",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{adminToken}}"}
+        ],
+        "url": "{{baseUrl}}/roles"
+      }
+    },
+    {
+      "name": "5. Create HR Manager User",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{adminToken}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"HR Manager\",\n  \"email\": \"hr@company.com\",\n  \"password\": \"hr123\",\n  \"role_id\": 2\n}"
+        },
+        "url": "{{baseUrl}}/users/create-with-role"
+      }
+    },
+    {
+      "name": "6. Create Department Manager",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{adminToken}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Sales Manager\",\n  \"email\": \"manager@company.com\",\n  \"password\": \"manager123\",\n  \"role_id\": 3\n}"
+        },
+        "url": "{{baseUrl}}/users/create-with-role"
+      }
+    },
+    {
+      "name": "7. Create Employee User",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"},
+          {"key": "Authorization", "value": "Bearer {{adminToken}}"}
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"John Employee\",\n  \"email\": \"employee@company.com\",\n  \"password\": \"employee123\",\n  \"role_id\": 4\n}"
+        },
+        "url": "{{baseUrl}}/users/create-with-role"
+      }
+    }
+  ]
+}

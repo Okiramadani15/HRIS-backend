@@ -1,0 +1,1061 @@
+{
+  "info": {
+    "name": "HRIS System - Complete Business Flow",
+    "description": "Complete end-to-end testing collection for HRIS system following business flow",
+    "version": "1.0.0"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api"
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "hrToken",
+      "value": ""
+    },
+    {
+      "key": "managerToken",
+      "value": ""
+    },
+    {
+      "key": "employeeToken",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 Phase 1: System Setup (Admin)",
+      "item": [
+        {
+          "name": "1.1 Register Admin User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    console.log('✅ Admin user registered successfully');",
+                  "} else {",
+                  "    console.log('❌ Admin registration failed:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"System Administrator\",\n  \"email\": \"admin@company.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": "{{baseUrl}}/register"
+          }
+        },
+        {
+          "name": "1.2 Login Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('adminToken', jsonData.token);",
+                  "    console.log('✅ Admin logged in successfully');",
+                  "} else {",
+                  "    console.log('❌ Admin login failed:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@company.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": "{{baseUrl}}/login"
+          }
+        },
+        {
+          "name": "1.3 Assign Admin Role",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    console.log('✅ Admin role assigned');",
+                  "} else {",
+                  "    console.log('❌ Role assignment failed:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{adminToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": 1,\n  \"role_id\": 1\n}"
+            },
+            "url": "{{baseUrl}}/assign-role"
+          }
+        },
+        {
+          "name": "1.4 Create HR Manager User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    console.log('✅ HR Manager created');",
+                  "} else {",
+                  "    console.log('❌ HR Manager creation failed:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{adminToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"HR Manager\",\n  \"email\": \"hr@company.com\",\n  \"password\": \"hr123\",\n  \"role_id\": 2\n}"
+            },
+            "url": "{{baseUrl}}/users/create-with-role"
+          }
+        },
+        {
+          "name": "1.5 Create Department Manager",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    console.log('✅ Department Manager created');",
+                  "} else {",
+                  "    console.log('❌ Manager creation failed:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{adminToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sales Manager\",\n  \"email\": \"manager@company.com\",\n  \"password\": \"manager123\",\n  \"role_id\": 3\n}"
+            },
+            "url": "{{baseUrl}}/users/create-with-role"
+          }
+        },
+        {
+          "name": "1.6 Create Employee User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    console.log('✅ Employee user created');",
+                  "    console.log('🎉 Phase 1 Complete: System Setup Done!');",
+                  "} else {",
+                  "    console.log('❌ Employee creation failed:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{adminToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Employee\",\n  \"email\": \"employee@company.com\",\n  \"password\": \"employee123\",\n  \"role_id\": 4\n}"
+            },
+            "url": "{{baseUrl}}/users/create-with-role"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏢 Phase 2: HR Operations Setup",
+      "item": [
+        {
+          "name": "2.1 Login HR Manager",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('hrToken', jsonData.token);",
+                  "    console.log('✅ HR Manager logged in');",
+                  "} else {",
+                  "    console.log('❌ HR login failed:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"hr@company.com\",\n  \"password\": \"hr123\"\n}"
+            },
+            "url": "{{baseUrl}}/login"
+          }
+        },
+        {
+          "name": "2.2 Create Departments",
+          "item": [
+            {
+              "name": "Create Sales Department",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Sales\",\n  \"description\": \"Sales and Marketing Department\",\n  \"manager_name\": \"Sales Manager\"\n}"
+                },
+                "url": "{{baseUrl}}/departments"
+              }
+            },
+            {
+              "name": "Create HR Department",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Human Resources\",\n  \"description\": \"HR Department\",\n  \"manager_name\": \"HR Manager\"\n}"
+                },
+                "url": "{{baseUrl}}/departments"
+              }
+            },
+            {
+              "name": "Create IT Department",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Information Technology\",\n  \"description\": \"IT Department\",\n  \"manager_name\": \"IT Manager\"\n}"
+                },
+                "url": "{{baseUrl}}/departments"
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.3 Create Positions",
+          "item": [
+            {
+              "name": "Create Manager Position",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Manager\",\n  \"description\": \"Department Manager\",\n  \"level\": \"Manager\"\n}"
+                },
+                "url": "{{baseUrl}}/positions"
+              }
+            },
+            {
+              "name": "Create Senior Staff Position",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Senior Staff\",\n  \"description\": \"Senior Level Staff\",\n  \"level\": \"Senior\"\n}"
+                },
+                "url": "{{baseUrl}}/positions"
+              }
+            },
+            {
+              "name": "Create Staff Position",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Staff\",\n  \"description\": \"Regular Staff\",\n  \"level\": \"Staff\"\n}"
+                },
+                "url": "{{baseUrl}}/positions"
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.4 Create Work Shifts",
+          "item": [
+            {
+              "name": "Create Regular Shift",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Regular Shift\",\n  \"start_time\": \"09:00\",\n  \"end_time\": \"17:00\",\n  \"break_duration\": 60\n}"
+                },
+                "url": "{{baseUrl}}/work-shifts"
+              }
+            },
+            {
+              "name": "Create Flexible Shift",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Flexible Shift\",\n  \"start_time\": \"08:00\",\n  \"end_time\": \"16:00\",\n  \"break_duration\": 60\n}"
+                },
+                "url": "{{baseUrl}}/work-shifts"
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.5 Create Leave Types",
+          "item": [
+            {
+              "name": "Create Annual Leave",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Annual Leave\",\n  \"description\": \"Yearly vacation leave\",\n  \"max_days\": 12,\n  \"is_paid\": true\n}"
+                },
+                "url": "{{baseUrl}}/leave-types"
+              }
+            },
+            {
+              "name": "Create Sick Leave",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Sick Leave\",\n  \"description\": \"Medical leave\",\n  \"max_days\": 30,\n  \"is_paid\": true\n}"
+                },
+                "url": "{{baseUrl}}/leave-types"
+              }
+            }
+          ]
+        },
+        {
+          "name": "2.6 Create Employee Records",
+          "item": [
+            {
+              "name": "Create Sales Employee",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"employee_id\": \"EMP001\",\n  \"full_name\": \"John Sales Executive\",\n  \"email\": \"john.sales@company.com\",\n  \"phone\": \"081234567890\",\n  \"department\": \"Sales\",\n  \"position\": \"Senior Staff\",\n  \"hire_date\": \"2024-01-15\",\n  \"status\": \"active\",\n  \"salary\": 15000000\n}"
+                },
+                "url": "{{baseUrl}}/employees"
+              }
+            },
+            {
+              "name": "Create HR Employee",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"employee_id\": \"EMP002\",\n  \"full_name\": \"Jane HR Specialist\",\n  \"email\": \"jane.hr@company.com\",\n  \"phone\": \"081234567891\",\n  \"department\": \"Human Resources\",\n  \"position\": \"Staff\",\n  \"hire_date\": \"2024-02-01\",\n  \"status\": \"active\",\n  \"salary\": 12000000\n}"
+                },
+                "url": "{{baseUrl}}/employees"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "📊 Phase 3: KPI Framework Setup",
+      "item": [
+        {
+          "name": "3.1 Create KPI Categories",
+          "item": [
+            {
+              "name": "Create Sales Performance Category",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Sales Performance\",\n  \"description\": \"Sales and revenue related KPIs\",\n  \"is_active\": true\n}"
+                },
+                "url": "{{baseUrl}}/kpi/categories"
+              }
+            },
+            {
+              "name": "Create Customer Service Category",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Customer Service\",\n  \"description\": \"Customer satisfaction KPIs\",\n  \"is_active\": true\n}"
+                },
+                "url": "{{baseUrl}}/kpi/categories"
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.2 Create KPI Metrics",
+          "item": [
+            {
+              "name": "Create Sales Target Metric",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"category_id\": 1,\n  \"name\": \"Monthly Sales Target\",\n  \"description\": \"Monthly sales achievement in rupiah\",\n  \"unit\": \"IDR\",\n  \"target_type\": \"higher_better\",\n  \"weight\": 3.0,\n  \"is_active\": true\n}"
+                },
+                "url": "{{baseUrl}}/kpi/metrics"
+              }
+            },
+            {
+              "name": "Create Customer Satisfaction Metric",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"category_id\": 2,\n  \"name\": \"Customer Satisfaction Score\",\n  \"description\": \"Customer satisfaction percentage\",\n  \"unit\": \"%\",\n  \"target_type\": \"higher_better\",\n  \"weight\": 2.5,\n  \"is_active\": true\n}"
+                },
+                "url": "{{baseUrl}}/kpi/metrics"
+              }
+            }
+          ]
+        },
+        {
+          "name": "3.3 Set KPI Targets",
+          "item": [
+            {
+              "name": "Set Sales Employee KPI Targets",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"targets\": [\n    {\n      \"employee_id\": \"EMP001\",\n      \"metric_id\": 1,\n      \"period\": \"2025-01\",\n      \"period_type\": \"monthly\",\n      \"target_value\": 75000000,\n      \"min_value\": 60000000,\n      \"max_value\": 90000000\n    },\n    {\n      \"employee_id\": \"EMP001\",\n      \"metric_id\": 2,\n      \"period\": \"2025-01\",\n      \"period_type\": \"monthly\",\n      \"target_value\": 90.0,\n      \"min_value\": 85.0,\n      \"max_value\": 100.0\n    }\n  ]\n}"
+                },
+                "url": "{{baseUrl}}/kpi/targets/bulk"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "👥 Phase 4: Daily Operations Testing",
+      "item": [
+        {
+          "name": "4.1 Employee Operations",
+          "item": [
+            {
+              "name": "Login Employee",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    var jsonData = pm.response.json();",
+                      "    pm.collectionVariables.set('employeeToken', jsonData.token);",
+                      "    console.log('✅ Employee logged in');",
+                      "} else {",
+                      "    console.log('❌ Employee login failed:', pm.response.text());",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"employee@company.com\",\n  \"password\": \"employee123\"\n}"
+                },
+                "url": "{{baseUrl}}/login"
+              }
+            },
+            {
+              "name": "Employee Clock In",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Authorization", "value": "Bearer {{employeeToken}}"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"employee_id\": \"EMP001\",\n  \"date\": \"2025-01-15\",\n  \"clock_in\": \"09:00:00\",\n  \"location\": \"Jakarta Office\",\n  \"status\": \"present\",\n  \"notes\": \"On time arrival\"\n}"
+                },
+                "url": "{{baseUrl}}/attendances"
+              }
+            },
+            {
+              "name": "Employee Submit Leave Request",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Authorization", "value": "Bearer {{employeeToken}}"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"employee_id\": \"EMP001\",\n  \"leave_type_id\": 1,\n  \"start_date\": \"2025-02-10\",\n  \"end_date\": \"2025-02-14\",\n  \"reason\": \"Family vacation\",\n  \"emergency_contact\": \"081234567890\"\n}"
+                },
+                "url": "{{baseUrl}}/leave-requests"
+              }
+            },
+            {
+              "name": "Employee View KPI Dashboard",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {"key": "Authorization", "value": "Bearer {{employeeToken}}"}
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/kpi/dashboard?employee_id=EMP001&period=2025-01",
+                  "query": [
+                    {"key": "employee_id", "value": "EMP001"},
+                    {"key": "period", "value": "2025-01"}
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.2 Manager Operations",
+          "item": [
+            {
+              "name": "Login Manager",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    var jsonData = pm.response.json();",
+                      "    pm.collectionVariables.set('managerToken', jsonData.token);",
+                      "    console.log('✅ Manager logged in');",
+                      "} else {",
+                      "    console.log('❌ Manager login failed:', pm.response.text());",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"manager@company.com\",\n  \"password\": \"manager123\"\n}"
+                },
+                "url": "{{baseUrl}}/login"
+              }
+            },
+            {
+              "name": "Manager View KPI Categories",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {"key": "Authorization", "value": "Bearer {{managerToken}}"}
+                ],
+                "url": "{{baseUrl}}/kpi/categories"
+              }
+            },
+            {
+              "name": "Manager View Team KPI Targets",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {"key": "Authorization", "value": "Bearer {{managerToken}}"}
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/kpi/targets?period=2025-01",
+                  "query": [
+                    {"key": "period", "value": "2025-01"}
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "4.3 HR Operations",
+          "item": [
+            {
+              "name": "HR Approve Leave Request",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"approved\",\n  \"approved_by\": \"HR Manager\",\n  \"approval_notes\": \"Leave approved. Enjoy your vacation!\"\n}"
+                },
+                "url": "{{baseUrl}}/leave-requests/1/status"
+              }
+            },
+            {
+              "name": "HR Record KPI Actual",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"employee_id\": \"EMP001\",\n  \"metric_id\": 1,\n  \"period\": \"2025-01\",\n  \"period_type\": \"monthly\",\n  \"actual_value\": 82000000,\n  \"notes\": \"Exceeded target by 9.3%\"\n}"
+                },
+                "url": "{{baseUrl}}/kpi/actuals"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "💰 Phase 5: Payroll Processing",
+      "item": [
+        {
+          "name": "5.1 Setup Allowances",
+          "item": [
+            {
+              "name": "Create Transport Allowance",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"employee_id\": \"EMP001\",\n  \"type\": \"transport\",\n  \"amount\": 500000,\n  \"description\": \"Monthly transport allowance\",\n  \"period\": \"2025-01\",\n  \"is_taxable\": false\n}"
+                },
+                "url": "{{baseUrl}}/allowances"
+              }
+            },
+            {
+              "name": "Create Performance Bonus",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"employee_id\": \"EMP001\",\n  \"type\": \"bonus\",\n  \"amount\": 2000000,\n  \"description\": \"Q4 2024 performance bonus\",\n  \"period\": \"2025-01\",\n  \"is_taxable\": true\n}"
+                },
+                "url": "{{baseUrl}}/allowances"
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.2 Setup Deductions",
+          "item": [
+            {
+              "name": "Create BPJS Deduction",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"employee_id\": \"EMP001\",\n  \"type\": \"bpjs\",\n  \"amount\": 150000,\n  \"description\": \"BPJS Kesehatan\",\n  \"period\": \"2025-01\",\n  \"is_mandatory\": true\n}"
+                },
+                "url": "{{baseUrl}}/deductions"
+              }
+            },
+            {
+              "name": "Create Tax Deduction",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"employee_id\": \"EMP001\",\n  \"type\": \"tax\",\n  \"amount\": 750000,\n  \"description\": \"PPh 21\",\n  \"period\": \"2025-01\",\n  \"is_mandatory\": true\n}"
+                },
+                "url": "{{baseUrl}}/deductions"
+              }
+            }
+          ]
+        },
+        {
+          "name": "5.3 Generate Payroll",
+          "item": [
+            {
+              "name": "Generate Monthly Payroll",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"period\": \"2025-01\",\n  \"employee_ids\": [\"EMP001\", \"EMP002\"],\n  \"include_allowances\": true,\n  \"include_deductions\": true,\n  \"include_overtime\": true\n}"
+                },
+                "url": "{{baseUrl}}/payroll/generate"
+              }
+            },
+            {
+              "name": "Get Payroll Summary",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/payroll/summary?period=2025-01",
+                  "query": [
+                    {"key": "period", "value": "2025-01"}
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "📈 Phase 6: Reports & Analytics",
+      "item": [
+        {
+          "name": "6.1 KPI Reports",
+          "item": [
+            {
+              "name": "Generate KPI Report",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/kpi/report?period=2025-01",
+                  "query": [
+                    {"key": "period", "value": "2025-01"}
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Employee KPI Dashboard",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {"key": "Authorization", "value": "Bearer {{employeeToken}}"}
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/kpi/dashboard?employee_id=EMP001&period=2025-01",
+                  "query": [
+                    {"key": "employee_id", "value": "EMP001"},
+                    {"key": "period", "value": "2025-01"}
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "6.2 Payroll Reports",
+          "item": [
+            {
+              "name": "Get Payroll Dashboard",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/payroll/dashboard?period=2025-01",
+                  "query": [
+                    {"key": "period", "value": "2025-01"}
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Employee View Payroll",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {"key": "Authorization", "value": "Bearer {{employeeToken}}"}
+                ],
+                "url": "{{baseUrl}}/payroll/EMP001"
+              }
+            }
+          ]
+        },
+        {
+          "name": "6.3 Attendance Reports",
+          "item": [
+            {
+              "name": "Get All Attendances",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/attendances?date=2025-01-15",
+                  "query": [
+                    {"key": "date", "value": "2025-01-15"}
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Leave Requests",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+                ],
+                "url": "{{baseUrl}}/leave-requests"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🔍 Phase 7: System Validation",
+      "item": [
+        {
+          "name": "7.1 Data Integrity Checks",
+          "item": [
+            {
+              "name": "Verify All Roles",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    var jsonData = pm.response.json();",
+                      "    if (jsonData.data && jsonData.data.length >= 4) {",
+                      "        console.log('✅ All roles properly seeded');",
+                      "    } else {",
+                      "        console.log('❌ Missing roles');",
+                      "    }",
+                      "} else {",
+                      "    console.log('❌ Cannot fetch roles');",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {"key": "Authorization", "value": "Bearer {{adminToken}}"}
+                ],
+                "url": "{{baseUrl}}/roles"
+              }
+            },
+            {
+              "name": "Verify Employee Data",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {"key": "Authorization", "value": "Bearer {{hrToken}}"}
+                ],
+                "url": "{{baseUrl}}/employees"
+              }
+            },
+            {
+              "name": "Verify KPI Setup",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {"key": "Authorization", "value": "Bearer {{managerToken}}"}
+                ],
+                "url": "{{baseUrl}}/kpi/categories"
+              }
+            }
+          ]
+        },
+        {
+          "name": "7.2 RBAC Validation",
+          "item": [
+            {
+              "name": "Employee Cannot Create KPI (Should Fail)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 403) {",
+                      "    console.log('✅ RBAC working - Employee blocked from KPI creation');",
+                      "} else {",
+                      "    console.log('❌ RBAC failed - Employee should not create KPI');",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Authorization", "value": "Bearer {{employeeToken}}"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Test Category\",\n  \"description\": \"Should fail\",\n  \"is_active\": true\n}"
+                },
+                "url": "{{baseUrl}}/kpi/categories"
+              }
+            },
+            {
+              "name": "Manager Cannot Create Employee (Should Fail)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 403) {",
+                      "    console.log('✅ RBAC working - Manager blocked from employee creation');",
+                      "    console.log('🎉 COMPLETE SYSTEM TEST SUCCESSFUL!');",
+                      "} else {",
+                      "    console.log('❌ RBAC failed - Manager should not create employees');",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"},
+                  {"key": "Authorization", "value": "Bearer {{managerToken}}"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"employee_id\": \"EMP999\",\n  \"full_name\": \"Should Fail\",\n  \"email\": \"fail@company.com\",\n  \"department\": \"Test\"\n}"
+                },
+                "url": "{{baseUrl}}/employees"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

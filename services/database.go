@@ -75,6 +75,31 @@ func (s *DatabaseService) GetAttendances(attendances *[]models.Attendance) error
 	return s.db.Preload("Employee").Find(attendances).Error
 }
 
+func (s *DatabaseService) GetAttendancesWithFilters(attendances *[]models.Attendance, date, employeeID, month string) error {
+	if attendances == nil {
+		panic("Attendances slice pointer cannot be nil")
+	}
+	
+	query := s.db.Preload("Employee")
+	
+	// Filter by specific date
+	if date != "" {
+		query = query.Where("DATE(date) = ?", date)
+	}
+	
+	// Filter by employee ID
+	if employeeID != "" {
+		query = query.Where("employee_id = ?", employeeID)
+	}
+	
+	// Filter by month (format: YYYY-MM)
+	if month != "" {
+		query = query.Where("DATE_FORMAT(date, '%Y-%m') = ?", month)
+	}
+	
+	return query.Find(attendances).Error
+}
+
 func (s *DatabaseService) GetAttendanceByID(id uint, attendance *models.Attendance) error {
 	if attendance == nil {
 		panic("Attendance pointer cannot be nil")
