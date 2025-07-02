@@ -168,28 +168,29 @@ func SetupRoutes(app *fiber.App) {
 	// Payroll Detail (All authenticated users) - PARAMETER ROUTE LAST
 	protected.Get("/payroll/:employee_id", controllers.GetPayrollDetail)
 
-	// KPI Management (HR/Admin Only)
+	// KPI Management (HR/Admin Only for CRUD)
 	kpiRoutes := protected.Group("/", middleware.RequireRoles(config.DB, "admin", "hr"))
 	
 	// KPI Categories
 	kpiRoutes.Post("/kpi/categories", controllers.CreateKPICategory)
-	kpiRoutes.Get("/kpi/categories", controllers.GetKPICategories)
 	
 	// KPI Metrics
 	kpiRoutes.Post("/kpi/metrics", controllers.CreateKPIMetric)
-	kpiRoutes.Get("/kpi/metrics", controllers.GetKPIMetrics)
 	
 	// KPI Targets
 	kpiRoutes.Post("/kpi/targets", controllers.SetKPITarget)
 	kpiRoutes.Post("/kpi/targets/bulk", controllers.SetBulkKPITargets)
-	kpiRoutes.Get("/kpi/targets", controllers.GetKPITargets)
 	
 	// KPI Actuals
 	kpiRoutes.Post("/kpi/actuals", controllers.RecordKPIActual)
-	kpiRoutes.Get("/kpi/actuals", controllers.GetKPIActuals)
 	
-	// KPI Reports
-	kpiRoutes.Get("/kpi/report", controllers.GetKPIReport)
+	// KPI Views (Manager & Above can view)
+	kpiViewRoutes := protected.Group("/", middleware.RequireRoles(config.DB, "admin", "hr", "manager"))
+	kpiViewRoutes.Get("/kpi/categories", controllers.GetKPICategories)
+	kpiViewRoutes.Get("/kpi/metrics", controllers.GetKPIMetrics)
+	kpiViewRoutes.Get("/kpi/targets", controllers.GetKPITargets)
+	kpiViewRoutes.Get("/kpi/actuals", controllers.GetKPIActuals)
+	kpiViewRoutes.Get("/kpi/report", controllers.GetKPIReport)
 	
 	// KPI Dashboard (All authenticated users can view their own)
 	protected.Get("/kpi/dashboard", controllers.GetKPIDashboard)
